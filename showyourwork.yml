@@ -33,8 +33,9 @@ datasets:
 dependencies:
   # src/scripts/my_script.py:
   #   - src/data/dataset_for_my_script.dat
-  # src/tex/ms.tex:
-  #   - src/tex/stylesheet.tex
+  src/tex/ms.tex:
+    - src/tex/blocked_likelihood_tikz.tex
+    - src/tex/definitions_table.tex
 
 # Name of the `.tex` manuscript and corresponding `.pdf` article
 ms_name: ms
@@ -50,12 +51,15 @@ overleaf:
   gh_actions_sync: true
   # List of files to push to Overleaf
   push:
-    - src/tex/figures
     - src/tex/output
   # List of files to pull from Overleaf
   pull:
     - src/tex/ms.tex
     - src/tex/bib.bib
+    - src/tex/figures/vi_vs_nuts_var3.pdf
+    - src/tex/figures/triangle_noise4a_eta0p5.pdf
+    - src/tex/figures/triangle_noise5a_eta0p5.pdf
+    - src/tex/figures/lisa_eta_sweep.pdf
 
 # Always require all input files to be present on disk for workflow to pass?
 require_inputs: true
