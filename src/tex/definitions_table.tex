@@ -5,8 +5,8 @@
     % Section-header macro: small vertical air above + italic group label,
     % no horizontal rule (cleaner than \cmidrule which created a busy look).
     \newcommand{\groupheader}[1]{%
-        \noalign{\vspace{4pt}}%
-        \multicolumn{2}{@{}l}{\textit{#1}} \\[1pt]
+        \addlinespace[4pt]%
+        \multicolumn{2}{@{}l}{\textit{#1}} \\[1pt]%
     }
     \begin{tabular}{p{0.16\textwidth} p{0.78\textwidth}}
         \toprule
