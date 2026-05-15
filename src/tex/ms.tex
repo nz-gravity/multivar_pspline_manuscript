@@ -788,8 +788,8 @@
 	NUTS warm-up, JIT compilation, and SVI initialisation overheads
 	rather than by the $\mathcal{O}(p^{2}\,N_{c}\,K)$ likelihood evaluation.
 	The benefit of coarse-graining at this scale is therefore primarily
-	statistical --- a smaller effective $N_{b}N_{h}$ makes the posterior
-	easier to sample --- rather than computational. Coarse-graining begins
+	statistical (a smaller effective $N_{b}N_{h}$ makes the posterior
+	easier to sample) rather than computational. Coarse-graining begins
 	to pay off in wall-clock terms once $N_{c}$ or $K$ is large enough
 	that the per-gradient cost exceeds the fixed overheads, as in the
 	LISA application below.
@@ -956,16 +956,16 @@
 	in contrast, reaches $\mathrm{RIAE}\approx 9\!-\!11\times10^{-4}$,
 	about $20\times$ smaller, and continues to improve with duration.
 	This is the central diagnostic of the LISA study: when the
-	per-MOSA noise levels are asymmetric --- the physically realistic
-	regime --- the AET rotation does \emph{not} diagonalise the
+	per-MOSA noise levels are asymmetric (the physically realistic
+	regime) the AET rotation does \emph{not} diagonalise the
 	cross-spectral matrix, and a multivariate model that estimates
 	the full Cholesky factor is required.
 
 	Posterior uncertainty contracts as expected for both models. The
 	median relative CI width on the diagonal PSDs falls from
-	$\approx\!4.7\%$ at 1\,month to $\approx\!1.2\%$ at 1\,year ---
+	$\approx\!4.7\%$ at 1\,month to $\approx\!1.2\%$ at 1\,year,
 	a reduction of roughly $4\times$, consistent with the $\sqrt{T}$
-	scaling expected for variance-dominated Whittle inference --- and
+	scaling expected for variance-dominated Whittle inference, and
 	is essentially identical across models and datasets, confirming
 	that the per-channel resolution is set by the data and not by the
 	choice of basis.
@@ -1062,7 +1062,7 @@
 	SVI overhead, while the 1-year fit ($\sim\!850$--$1090$\,s) begins
 	to expose the per-gradient $\mathcal{O}(p\,N_{b}\,N_{c}\,K)$ cost
 	as $N_{b}$ reaches $52$. Even the 1-year fit completes in under
-	twenty minutes on a single 4-core CPU node --- roughly a
+	twenty minutes on a single 4-core CPU node, roughly a
 	$2\times$ speed-up at 1\,month and $1.5\times$ at 6\,months over
 	the previous-generation single-model pipeline, with comparable
 	throughput at 1\,year. The $\mathcal{H}_{AET}$ model is
@@ -1328,4 +1328,6 @@
 	\bibliography{bib}% Produces the bibliography via BibTeX.
 \end{document}
 %
+%%DONE
+
 % ****** End of file apssamp.tex ******
