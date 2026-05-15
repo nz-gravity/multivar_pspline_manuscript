@@ -4,6 +4,8 @@ rule make_blocked_likelihood_figure:
         tikz="src/tex/blocked_likelihood_tikz.tex",
     output:
         "src/tex/figures/blocked_likelihood.pdf",
+    conda:
+        "environment.yml"
     shell:
         """
         cd src/tex

@@ -7,3 +7,4 @@ dependencies:
   - matplotlib==3.10
   - pandas
   - h5py
+  - tectonic
