@@ -1,3 +1,18 @@
+rule make_blocked_likelihood_figure:
+    input:
+        wrapper="src/tex/build_blocked_likelihood.tex",
+        tikz="src/tex/blocked_likelihood_tikz.tex",
+    output:
+        "src/tex/figures/blocked_likelihood.pdf",
+    shell:
+        """
+        cd src/tex
+        tectonic build_blocked_likelihood.tex
+        mkdir -p figures
+        mv build_blocked_likelihood.pdf figures/blocked_likelihood.pdf
+        """
+
+
 rule make_var3_figure:
     input:
         script="src/scripts/plot_var3.py",
