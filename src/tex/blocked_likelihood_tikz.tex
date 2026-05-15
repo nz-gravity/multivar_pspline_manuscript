@@ -1,9 +1,16 @@
 % blocked_likelihood_tikz.tex
 %
 % Schematic of the blocked, coarse-grained periodogram pipeline.
-\usetikzlibrary{arrows.meta, calc, positioning, decorations.pathreplacing}
 %
-% Use as: \input{blocked_likelihood_tikz}
+% NOTE: ms.tex does NOT \input this file directly. The figure is included
+% as a pre-rendered PDF (figures/blocked_likelihood.pdf) to keep Overleaf
+% compile times under the free-tier budget. To rebuild the PDF after
+% editing this file, run from src/tex/:
+%     tectonic build_blocked_likelihood.tex
+%     mv build_blocked_likelihood.pdf figures/blocked_likelihood.pdf
+% See build_blocked_likelihood.tex for the standalone wrapper.
+%
+\usetikzlibrary{arrows.meta, calc, positioning, decorations.pathreplacing}
 %
 \begin{tikzpicture}[
     >={Latex[length=2.2mm,width=1.6mm]},
@@ -46,7 +53,7 @@
 \node[lengthlabel, left=1mm of Z.south west]   {$t=T$};
 
 % ---------------- Stage 1: blocks (vertical stack) ----------------------
-\node[block, right=12mm of Z.east, yshift=10.4mm] (b1)    {$b_1$};
+\node[block, right=22mm of Z.east, yshift=10.4mm] (b1)    {$b_1$};
 \node[block, below=1.2mm of b1]                   (b2)    {$b_2$};
 \node[block, below=1.2mm of b2]                   (b3)    {$b_3$};
 \node[below=0.5mm of b3]                          (bdots) {$\vdots$};
@@ -72,8 +79,10 @@
 \node[lengthlabel, below=2mm of pNb.south]
     {$n/(2N_{b})$ freqs/block};
 
-% Arrow stage1 -> stage2
-\draw[->, thick] ([xshift=2mm]b1.east) -- ([xshift=-2mm]p1.west)
+% Arrow stage1 -> stage2 (aligned vertically with the other inter-stage arrows)
+\draw[->, thick]
+    ($(b1.east)!0.5!(bNb.east) + (2mm, 0)$) --
+    ($(p1.west)!0.5!(pNb.west) + (-2mm, 0)$)
     node[arrowlabel, midway, above]{FFT};
 
 % Brace gathering all blocked periodograms
@@ -82,13 +91,13 @@
 
 % Arrow stage2 -> stage3 with averaging formula
 \coordinate (braceTip) at ($(p1.east)!0.5!(pNb.east) + (8mm, 0)$);
-\coordinate (avgcenter) at ($(p1)!0.5!(pNb) + (47mm, 0)$);
+\coordinate (avgcenter) at ($(p1)!0.5!(pNb) + (62mm, 0)$);
 \coordinate (avgLeft)   at ($(avgcenter) + (-19mm, 0)$);
 
 \draw[->, thick] (braceTip) -- (avgLeft);
 \node[formulalabel] at ($(braceTip)!0.5!(avgLeft) + (0, 3mm)$)
     {sum over blocks};
-\node[formulalabel] at ($(braceTip)!0.5!(avgLeft) + (0, -3mm)$)
+\node[formulalabel] at ($(braceTip)!0.5!(avgLeft) + (0, -6mm)$)
     {$\mathbf{Y}(f_{k})=\sum_{i=1}^{N_{b}}\mathbf{I}^{(i)}(f_{k})$};
 
 % ---------------- Stage 3: averaged periodogram (8 fine cells) ----------
@@ -126,7 +135,7 @@
 
 % Side caption to the right explaining the grouping operation.
 \node[formulalabel, anchor=west, align=left]
-    at ($(avg8.east) + (15mm, -8mm)$)
+    at ($(avg8.east) + (5mm, -8mm)$)
     {sum every $N_{h}$ frequencies\\[1pt]
      $\mathbf{Y}_{h}^{*}=\!\!\displaystyle\sum_{f_{k}\in J_{h}}\!\!\mathbf{Y}(f_{k})$};
 

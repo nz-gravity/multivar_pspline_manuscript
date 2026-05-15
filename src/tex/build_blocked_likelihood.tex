@@ -1,0 +1,30 @@
+% Standalone wrapper to rebuild figures/blocked_likelihood.pdf
+% from blocked_likelihood_tikz.tex.
+%
+% Why this exists: the figure is included into ms.tex as a pre-rendered PDF
+% rather than via \input{blocked_likelihood_tikz}, because Overleaf's
+% free-tier compile budget can time out on the live TikZ render.
+%
+% Rebuild (run from src/tex/):
+%     tectonic build_blocked_likelihood.tex
+%     mv build_blocked_likelihood.pdf figures/blocked_likelihood.pdf
+%
+% (pdflatex works too: `pdflatex build_blocked_likelihood.tex`.)
+%
+% The \newcommand block below mirrors the math macros that ms.tex defines
+% in its preamble -- keep them in sync if you add new symbols to the figure.
+
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath,amssymb,bm}
+\usetikzlibrary{arrows.meta, calc, positioning, decorations.pathreplacing}
+
+\newcommand{\Z}{{\bf Z}}
+\newcommand{\Y}{{\bf Y}}
+\renewcommand{\S}{{\bf S}}
+\renewcommand{\d}{{\bf d}}
+\newcommand{\I}{\mbox{{\bf I}}}
+
+\begin{document}
+\input{blocked_likelihood_tikz}
+\end{document}
