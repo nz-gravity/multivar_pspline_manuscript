@@ -103,7 +103,12 @@
 \renewcommand{\v}{{\bf v}}
 
 
-
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,  % A muted, darker blue
+    citecolor=green!50!black, % A soft forest green
+    urlcolor=blue!50!white    % A lighter, sky-blue
+}
 
 % Some bib entries carry a `language = {en}` field that the apsrev4-2 style
 % emits as \selectlanguage{...}; redefine to a no-op so we don't need babel.
@@ -112,7 +117,7 @@
 \begin{document}
 	\preprint{APS/123-QED}
 
-	\title{Multivariate Bayesian P-spline estimation of spectral density matrices,
+	\title{Multivariate Bayesian P-spline estimation of spectral density matrices,\\
 		with application to LISA TDI noise}
 
     \author{Avi Vajpeyi$^{1}$}
@@ -382,7 +387,6 @@
 	regressions below.
 
 	\paragraph{Coarse graining.}
-	\label{subsec:coarse}
 	Blocking reduces the number of periodogram matrices from $N$ to
 	$n/(2N_{b})$, but each of the remaining frequencies still requires a
 	separate evaluation of $\S(f_{k})^{-1}$. Where $\S(f)$ is slowly
@@ -673,7 +677,6 @@
 
 
 	\paragraph{Implementation.}
-	\label{sec:computation}
 	We implement the model in \textsc{JAX}~\cite{jax2018github} with
 	NumPyro~\cite{phan2019numphyro}, exploiting automatic differentiation
 	and JIT compilation for gradient-based sampling. Throughout we use
@@ -931,7 +934,7 @@
 	computing the DFT to suppress spectral leakage. The three TDI
 	transfer-function nulls at $0.030$, $0.060$, and $0.090$\,Hz are
 	excised with half-width $1$\,mHz prior to fitting. All other settings
-	follow Section~\ref{sec:computation}.
+	follow Section~\ref{sec:bayesian-inference}.
 
 	Table~\ref{tab:lisa_results} summarises convergence and CI-width
 	diagnostics for the two models, two datasets, and three observation
@@ -1191,8 +1194,9 @@
 	and configuration files needed to reproduce the results. 
 	Installation instructions and dependency information (tested on Python~$\geq 3.10$) are provided in the repository \texttt{README}. 
 	The software is released under the MIT License, permitting free use, modification, and distribution. 
-	The datasets generated are available at the public Zenodo repository.
 	LISA time series data is available at~\citep{lisa_noise4a, lisa_noise5a}. 
+    Scripts for the LISA analysis are provided from the GitHub repository
+	\url{http://github.com/nz-gravity/lisa_multivar_logpsplines_study.git}
 
 
 	\begin{acknowledgments}
