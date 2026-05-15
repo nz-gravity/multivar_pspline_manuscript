@@ -87,9 +87,9 @@
 
 \draw[->, thick] (braceTip) -- (avgLeft);
 \node[formulalabel] at ($(braceTip)!0.5!(avgLeft) + (0, 3mm)$)
-    {average};
+    {sum over blocks};
 \node[formulalabel] at ($(braceTip)!0.5!(avgLeft) + (0, -3mm)$)
-    {$\bar{\mathbf{I}}=\tfrac{1}{N_{b}}\sum_{i}\mathbf{I}^{(i)}$};
+    {$\mathbf{Y}(f_{k})=\sum_{i=1}^{N_{b}}\mathbf{I}^{(i)}(f_{k})$};
 
 % ---------------- Stage 3: averaged periodogram (8 fine cells) ----------
 \foreach \i in {1,...,8} {%
@@ -97,7 +97,7 @@
 }
 
 \node[stagelabel] at ($(avgcenter) + (0, 8mm)$)
-    {Averaged periodogram $\bar{\mathbf{I}}$};
+    {Blocked periodogram $\mathbf{Y}(f_{k})$};
 
 % ---------------- Stage 4: coarse-grained periodogram (4 cells) ---------
 % Coarse cells one row below, with each centred on a pair of fine cells.

@@ -45,6 +45,9 @@
 \usepackage[commandnameprefix=ifneeded]{changes}
 \definechangesauthor[name={Avi}, color=blue]{AV}
 
+\newcommand{\codelink}[1]{%
+	\quad\text{\href{#1}{\scalebox{0.65}{\GitHubIcon}}}%
+}
 
 
 \newcommand{\avi}[1]{\textcolor{orange}{[Avi: #1]}}
@@ -281,7 +284,8 @@
 	asymptotic Gaussian approximation is the basis of the multivariate
 	Whittle likelihood~\citep{grainger2023multivariate}
 	\begin{align}
-		\label{eq:Whittle likelihood}\mathcal{L}(\d|\S) & \propto \prod_{k=1}^{N}\det(\S(f_{k}))^{-1}\times \nonumber         \\
+		\label{eq:Whittle likelihood}
+		\mathcal{L}(\d|\S) & \propto \prod_{k=1}^{N}\det(\S(f_{k}))^{-1}\times \nonumber         \\
 		                                                & \exp\left(-\frac{1}{T}\d(f_{k})^{*} \S(f_{k})^{-1}\d(f_{k})\right),
 	\end{align}
 	where $\d(f_{k})^{*}$ denotes the conjugate transpose of $\d(f_{k})$ and
@@ -348,12 +352,10 @@
 	$\det(\M)^{-m}\exp(-\tr[\M^{-1}\A])$, with mean $m\M$.}
 	from summing $N_{b}$ assumed-independent single-block periodogram
 	contributions:
-	\[
-		\I^{(i)}(f_{k})\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),1),
-		\qquad
-		\Y(f_{k})\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),N_{b}).
-	\]
-
+	\begin{align}
+	\I^{(i)}(f_{k})&\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),1),\\
+	\Y(f_{k})&\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),N_{b}).
+	\end{align}
 	\paragraph*{Eigendecomposition.}
 	Because $\Y(f_{k})$ is Hermitian positive semidefinite, it admits an
 	eigendecomposition
@@ -363,12 +365,15 @@
 	$\u^{(k)}_{\nu}=\sqrt{\lambda^{(k)}_{\nu}}\,\v^{(k)}_{\nu}$.
 	Substituting into the trace in \eqref{eq:blocked-trace} gives the
 	eigenvector form of the blocked likelihood,
-	\begin{equation}
-		\label{eq:log-like}
+	\begin{align}
 		\mathcal{L}_{b}(\d|\S)
-		\propto \prod_{k=1}^{n/(2N_{b})} \left|\S(f_{k})\right|^{-N_{b}}
-		\exp\!\left(-\tfrac{1}{T_{b}}\sum_{\nu=1}^{p}\u_{\nu}^{(k)*}\S(f_{k})^{-1}\u_{\nu}^{(k)}\right).
-	\end{equation}
+		&\propto \prod_{k=1}^{n/(2N_{b})}
+		\left|\S(f_{k})\right|^{-N_{b}} \nonumber\\
+		&\quad\times
+		\exp\!\left(-\tfrac{1}{T_{b}}\sum_{\nu=1}^{p}
+		\u_{\nu}^{(k)*}\S(f_{k})^{-1}\u_{\nu}^{(k)}\right).
+		\label{eq:log-like}
+	\end{align}
 	This follows from the spectral decomposition of the Hermitian positive
 	semidefinite $\Y(f_k)$ and the linearity of the trace. The
 	eigenvector representation is used computationally because it turns the
@@ -407,11 +412,15 @@
 			The $n$-sample timeseries is partitioned into $N_{b}$
 			non-overlapping blocks $\{b_{i}\}$ of length $T/N_{b}$. Each
 			block is Fourier-transformed independently, yielding $N_{b}$
-			single-block periodograms each of length $n/(2N_{b})$. The
-			block-averaged periodogram (Welch estimator) is then summed
-			over consecutive groups of $N_{h}$ adjacent fine frequencies to
-			produce the final coarse-grained periodogram of length
-			$n/(2N_{b}N_{h})$.}
+			single-block periodograms $\mathbf{I}^{(i)}$ each of length
+			$n/(2N_{b})$. These are summed across blocks to form the
+			blocked periodogram
+			$\mathbf{Y}(f_{k})=\sum_{i=1}^{N_{b}}\mathbf{I}^{(i)}(f_{k})$
+			(related to the Welch estimator by
+			$\bar{\mathbf{I}}=\mathbf{Y}/N_{b}$), which is then summed
+			over consecutive groups of $N_{h}$ adjacent fine frequencies
+			to produce the final coarse-grained periodogram
+			$\mathbf{Y}_{h}^{*}$ of length $n/(2N_{b}N_{h})$.}
 		\label{fig:blocked_likelihood}
 	\end{figure*}
 
@@ -426,11 +435,11 @@
 		\propto \prod_{h=1}^{N_{c}} \left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}
 		\exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{*}\right]\right),
 	\end{equation}
-	with eigendecomposition $\Y_{h}^{*}=\sum_{\nu=1}^{p}
-	\u^{(h)}_{\nu}\u^{(h)*}_{\nu}$,
-	$\u^{(h)}_{\nu}=\sqrt{\lambda^{(h)}_{\nu}}\,\v^{(h)}_{\nu}$.
-
-
+	with eigendecomposition 
+	\begin{align}
+	\Y_{h}^{*}&=\sum_{\nu=1}^{p} \u^{(h)}_{\nu}\u^{(h)*}_{\nu}\, ,\\
+	\u^{(h)}_{\nu}&=\sqrt{\lambda^{(h)}_{\nu}}\,\v^{(h)}_{\nu}
+	\end{align}
 
 	\subsection{Parametrisation using the Cholesky Decomposition}
 	Following~\citet{RosenOri2007Aeom,Hu2023}, we parametrise the
@@ -467,7 +476,7 @@
 		\mathcal{L}_{j}(\btheta_{j},\bdelta_{j}) \propto
 		\prod_{h=1}^{N_{c}} \delta_{jh}^{-2N_{b}N_{h}}
 		\exp\!\left(\frac{-\sum_{\nu=1}^{p}\left|u_{j\nu}^{(h)}-\sum_{l=1}^{j-1}\theta_{jl}^{(h)}\,u_{l\nu}^{(h)}\right|^{2}}
-		              {T_{b}\,\delta_{jh}^{2}}\right),
+		              {T_{b}\,\delta_{jh}^{2}}\right), \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/main/src/log_psplines/pipeline/models.py\#L81}
 	\end{equation}
 	\end{widetext}%
 	with regression coefficients $\theta_{jl}^{(h)}$ (the off-diagonal
@@ -574,7 +583,7 @@
 	\begin{align}
 		\log \delta_{jk}^{2}    & = \sum_{m=1}^{K_j}B_{m}(f_{k}) w_{j,m}^{(\delta)}\label{eq:delta_spline}     \\
 		\Re[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Re)}\label{eq:theta_re_spline} \\
-		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline}
+		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline} \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/b8e58fd8aaef0c0179499cf7b6a3c2482667626b/src/log_psplines/psplines/psplines.py\#L545}
 	\end{align}
 	where $B_{m}(f_{k})$ are B-spline basis functions evaluated at frequency
 	$f_{k}$, $K_{j}$ and $K_{jl}$ are the numbers of basis functions for the
@@ -1255,8 +1264,9 @@
    ~\citet{Liu2023}. Entries are mean $\pm$ standard deviation over 500
     independent realisations. Smaller values are better.}
     \label{tab:var2_l2_results}
-    \setlength{\tabcolsep}{10pt}
-    \begin{NiceTabular}{lccc}
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \begin{NiceTabular}{@{}lccc@{}}
         \toprule
         {$n$} & {P-spline} & {VB} & {VNPC} \\
         \midrule
