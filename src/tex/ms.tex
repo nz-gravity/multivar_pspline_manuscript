@@ -162,98 +162,106 @@
 	\section{\label{sec:intro}Introduction}
 
 	Accurate estimation of the noise power spectral density (PSD) underpins
-	gravitational-wave (GW) data analysis: search, parameter estimation, and
-	stochastic-background inference all require a reliable noise model across
-	the detector band. For LIGO and Virgo, parametric models augmented with
-	spline components, most notably BayesLine~\citep{littenberg_bayesian_2015}, are widely used.
-	The space-based detector LISA~\citep{Amaro-SeoanePau2017LISA} poses a harder problem: its three
-	time-delay interferometry (TDI) channels are correlated, and their noise
-	properties vary smoothly but non-trivially across the millihertz band.
-	A single-channel noise model cannot capture the cross-spectral correlations
-	that matter for joint inference.
-
-	Nonparametric/flexible Bayesian approaches to PSD estimation have a well-developed
-	statistical foundation, characterised by an expansion of the PSD in terms of an
-	infinite/large number of basis functions combined with noninformative priors on the
-	coefficients. Examples include
-	Bernstein polynomials with weights induced by Dirichlet process priors~\citep{10.1214/18-BA1126},
-	Akima splines with Beta distributions on control frequencies~\citep{BaghiQuentin2023Ugbf},
-	cosines with a discounted regularized horseshoe prior~\citep{PhysRevD.111.062003}, and
-	B-splines with knots and weights induced by Dirichlet process priors~\citep{EdwardsMatthewC.2019Bnsd}.
-	With an a priori unknown and potentially infinite number of basis functions, posterior
-	computation requires trans-dimensional Markov chain Monte Carlo (MCMC) algorithms,
-	which are computationally expensive. Penalised B-splines (P-splines)~\citep{EilersMarx1996}
-	avoid the trans-dimensional step by representing smooth functions as linear combinations
-	of a finite but large number of B-spline basis functions, with a roughness penalty on
-	adjacent coefficients that prevents overfitting. In a Bayesian formulation this
-	penalty can be incorporated naturally into the prior distribution of the
-	spline coefficients. Applied to
-	spectral density estimation via the Whittle likelihood, this yields a
-	smooth, data-driven estimator that requires no parametric noise template.
-	Univariate Bayesian P-spline PSD methods were introduced by
-	\citet{maturana-russel_bayesian_2021} and have since been applied to GW
-	data, including recent LISA-specific work that introduced log-spline
-	representations tuned to the steep low-frequency rise of LISA noise
-	\citep{aimen2026lisa}, as well as nonparametric stochastic-background
-	searches that jointly model unknown noise shapes
-	\citep{baghi2023sgwb,santini2025sgwb}.
-
-	These univariate approaches model each channel independently. This is
-	justified in the idealised equal-arm stationary LISA configuration, which
-	has vanishing off-diagonal cross-spectra between the three TDI channels,
-	but realistic noise (unequal arm lengths, per-MOSA imbalance, and
-	instrumental breathing~\citep{muratore2021instrumental}) generates
-	non-trivial off-diagonal entries in the $3\times 3$ spectral density
-	matrix $\S(f)$, whose normalised magnitudes (the channel-pair
-	coherences) quantify the cross-channel correlation that
-	single-channel models discard. Treating these cross-spectra as zero when they are not
-	can degrade sensitivity to stochastic GW backgrounds and bias parameter
-	estimation~\citep{PhysRevD.110.104060,PhysRevD.107.123531}.
-	Any extension of univariate methods to nonparametrically model $\S(f)$
-	needs to ensure Hermitian positive definiteness
-	at every frequency while allowing each matrix element to vary smoothly
-	with frequency.
-
-    Existing nonparametric treatments of LISA TDI spectral matrices take two
-    main routes. Muratore, Gair and Speri~\citep{PhysRevD.109.042001} model
-    the diagonal PSDs and the real and imaginary parts of the cross-spectra of
-    $\S(f)$ separately using natural cubic splines. This is flexible, but does
-    not by itself guarantee that the assembled matrix is positive definite.
-    A more structured alternative starts from the six single-link
-    measurements, assumes equal and uncorrelated test-mass acceleration and
-    optical-metrology-system noises with univariate spectra $S_{TM}$ and
-    $S_{OMS}$, and approximates the delay operators defining the XYZ TDI
-    variables as complex phase factors. With fixed, known TDI transfer
-    functions, the resulting XYZ spectral matrix is Hermitian positive
-    definite while only $S_{TM}$ and $S_{OMS}$ are modelled nonparametrically
-    with cubic splines~\citep{BaghiQuentin2023Ugbf}.
-    
-
-	In this paper, we model the PSD matrix of the XYZ TDI variables directly by extending the Bayesian P-spline PSD framework
-	\citep{maturana-russel_bayesian_2021} to the multivariate $p$-dimensional
-	setting. We parametrise $\S(f)^{-1}$ through its Cholesky
-	decomposition~\citep{RosenOri2007Aeom, Hu2023}, which factorises the
-	posterior density into $p$ independent components that can be
-	sampled in parallel and guarantees the Hermitian positive definiteness
-	condition.
-	Each block's log-diagonal spectra and real and imaginary parts of the complex
-	off-diagonal cross-spectra are modeled with penalised B-splines under a
-	hierarchical smoothing prior.
-	This prior is updated by a blocked, coarse-grained Whittle likelihood
-	with safe-Bayes $\eta$-tempering~\citep{grunwald2019} to stabilise
-	posterior calibration. Each chain is initialised from a draw of a
-	stochastic variational approximation~\citep{hoffman2013_SVI}, with
-	sampling performed by the No-U-Turn Sampler~\citep{hoffman2014_NUTS}.
-	We validate the method on a bivariate VAR(2) benchmark against
-	\citet{Liu2023}, a three-channel VAR(2) simulation, and a simulated LISA
-	data segment.
-
-	The remainder of the paper is organised as follows.
-	Section~\ref{sec:psplines} develops the statistical model and the
-	inference scheme. Section~\ref{sec:application} presents simulation
-	studies on a 3D VAR(2) benchmark and on simulated LISA TDI data.
-	Section~\ref{sec:discussion} summarises the results, discusses limitations
-	and future directions.
+    gravitational-wave (GW) data analysis: search, parameter estimation, and
+    stochastic-background inference all require a reliable noise model across
+    the detector band. For LIGO and Virgo, parametric models augmented with
+    spline components, most notably BayesLine~\citep{littenberg_bayesian_2015}, are widely used.
+    The space-based detector LISA~\citep{Amaro-SeoanePau2017LISA} poses a harder problem: its three
+    time-delay interferometry (TDI) channels are correlated, and their noise
+    properties vary smoothly but non-trivially across the millihertz band.
+    A single-channel noise model cannot capture the cross-spectral correlations
+    that matter for joint inference.
+     
+    Nonparametric/flexible Bayesian approaches to PSD estimation have a well-developed
+    statistical foundation, characterised by an expansion of the PSD in terms of an
+    infinite/large number of basis functions combined with noninformative priors on the
+    coefficients. Examples include
+    Bernstein polynomials with weights induced by Dirichlet process priors~\citep{beyond_whittle},
+    cosines with a discounted regularized horseshoe prior~\citep{jianan_vi_sgvb_et}, and
+    B-splines with knots and weights induced by Dirichlet process priors~\citep{edwards_bayesian_2019}.
+    With an a priori unknown and potentially infinite number of basis functions, posterior
+    computation requires trans-dimensional Markov chain Monte Carlo (MCMC) algorithms,
+    which are computationally expensive. Penalised B-splines (P-splines)~\citep{EilersMarx1996}
+    avoid the trans-dimensional step by representing smooth functions as linear combinations
+    of a finite but large number of B-spline basis functions, with a roughness penalty on
+    adjacent coefficients that prevents overfitting. In a Bayesian formulation this
+    penalty can be incorporated naturally into the prior distribution of the
+    spline coefficients. Applied to
+    spectral density estimation via the Whittle likelihood, this yields a
+    smooth, data-driven estimator that requires no parametric noise template.
+    Univariate Bayesian P-spline PSD methods were introduced by
+    \citet{maturana-russel_bayesian_2021}. They have since been applied to GW
+    noise estimation, including recent LISA-specific work that uses log-spline
+    representations tuned to the steep low-frequency rise of LISA noise
+    \citep{aimen2026lisa}. Related nonparametric strategies model unknown noise
+    shapes in stochastic-background searches with other spline families rather
+    than penalised B-splines. These include cubic B-spline single-link noise
+    models analysed by Bayesian model selection \citep{baghi_uncovering_2023},
+    and Akima-spline noise components introduced at the TDI level with the
+    number and location of knots inferred by a reversible-jump MCMC
+    \citep{santini2025sgwb}.
+     
+    These univariate approaches model each channel independently. This is
+    justified in the idealised equal-arm stationary LISA configuration, which
+    has vanishing off-diagonal cross-spectra between the three TDI channels,
+    but realistic noise (unequal arm lengths, per-MOSA imbalance, and
+    instrumental breathing~\citep{muratore2021instrumental}) generates
+    non-trivial off-diagonal entries in the $3\times 3$ spectral density
+    matrix $\S(f)$, whose normalised magnitudes (the channel-pair
+    coherences) quantify the cross-channel correlation that
+    single-channel models discard. Treating these cross-spectra as zero when they are not
+    can degrade sensitivity to stochastic GW backgrounds and bias parameter
+    estimation~\citep{CiredduLnLforNetwork,sgwb-unequal-noise-lisa-olaf}.
+    Any extension of univariate methods to nonparametrically model $\S(f)$
+    needs to ensure Hermitian positive definiteness
+    at every frequency while allowing each matrix element to vary smoothly
+    with frequency.
+     
+    Existing nonparametric treatments of LISA TDI spectral matrices follow two
+    broad routes. \citet{muratore_impact_2023} model the diagonal PSDs and the
+    real and imaginary parts of the cross-spectra of $\S(f)$ as smooth
+    fractional deviations from a design spectrum, each represented by a natural
+    cubic spline. They note that this construction is not guaranteed to yield a
+    positive-definite matrix away from the design point, and that it is well
+    suited to their local Fisher-matrix study of noise-knowledge uncertainty
+    rather than to fitting data directly. A second route models the single-link
+    noise log-PSD nonparametrically with cubic B-splines and maps it to the TDI
+    variables through the known TDI transfer functions~\citep{baghi_uncovering_2023}.
+    Because the resulting TDI covariance is built from a valid single-link
+    covariance through this linear transfer, it is Hermitian positive definite
+    by construction, at the cost of assuming the simplified single-link noise
+    structure.
+     
+    In this paper, we model the PSD matrix of the XYZ TDI variables directly by extending the Bayesian P-spline PSD framework
+    \citep{maturana-russel_bayesian_2021} to the multivariate $p$-dimensional
+    setting. We parametrise $\S(f)^{-1}$ through its Cholesky
+    decomposition~\citep{RosenOri2007Aeom, Hu2023}, which factorises the
+    posterior density into $p$ independent components that can be
+    sampled in parallel and guarantees the Hermitian positive definiteness
+    condition.
+    Each block's log-diagonal spectra and real and imaginary parts of the complex
+    off-diagonal cross-spectra are modeled with penalised B-splines under a
+    hierarchical smoothing prior.
+    This prior is updated by a blocked, coarse-grained Whittle likelihood
+    with safe-Bayes $\eta$-tempering~\citep{grunwald2019} to stabilise
+    posterior calibration. Each chain is initialised from a draw of a
+    stochastic variational approximation~\citep{hoffman2013_SVI}, with
+    sampling performed by the No-U-Turn Sampler~\citep{hoffman2014_NUTS}.
+    We validate the method on a three-channel VAR(2) simulation with known
+    ground truth, and on simulated LISA TDI data in a symmetric and a
+    physically realistic asymmetric per-MOSA noise configuration. In the
+    asymmetric case an AET-restricted model fails by an order of magnitude in
+    relative integrated absolute error while the full multivariate model
+    recovers the cross-spectral structure. A further benchmark against the
+    bivariate estimators of \citet{yixuan_vnpc} on a VAR(2) problem with
+    closed-form ground truth is reported in Appendix~\ref{app:bivariate}.
+     
+    The remainder of the paper is organised as follows.
+    Section~\ref{sec:psplines} develops the statistical model and the
+    inference scheme. Section~\ref{sec:application} presents simulation
+    studies on a 3D VAR(2) benchmark and on simulated LISA TDI data.
+    Section~\ref{sec:discussion} summarises the results, discusses limitations
+    and future directions.
 
 	\section{Multivariate P-splines}\label{sec:psplines}
 
@@ -1236,9 +1244,9 @@
 	This appendix benchmarks the proposed estimator against the bivariate
 	Bayesian baselines available in the literature on a controlled VAR(2)
 	problem with closed-form ground truth.
-	Following~\citet{Liu2023}, we simulate 500 independent realisations of a bivariate
+	Following~\citet{yixuan_vnpc}, we simulate 500 independent realisations of a bivariate
 	time series from a vector autoregressive model of order 2, VAR(2), using three different
-	sample sizes $n=256,512,1024$ (refer to~\citet[Section~4.2,][]{Liu2023} for the
+	sample sizes $n=256,512,1024$ (refer to~\citet[Section~4.2,][]{yixuan_vnpc} for the
 	definitions of the VAR(2) models). The spectral densities are estimated using
 	the multivariate P-spline method with $K=16$ basis functions and cubic splines
 	($d=3$) for each spectral component. We validate the multivariate P-spline method
@@ -1246,7 +1254,7 @@
 	spectral properties. The theoretical spectral density matrix provides exact
 	ground truth for comparison. To benchmark against existing Bayesian multivariate
 	spectral estimators, we compare to the variational Bayes (VB) and variational
-	nonparametric correction (VNPC) methods of~\citet{Liu2023} using the same
+	nonparametric correction (VNPC) methods of~\citet{yixuan_vnpc} using the same
 	$L_{2}$ error criterion. The $L_{2}$ error is the un-normalised
 	counterpart of the matrix RIAE used in the main text: it is the
 	Frobenius-norm integrated absolute error of the posterior-median
@@ -1265,7 +1273,7 @@
 	\begin{table}[!t]
     \centering
     \caption{Bivariate VAR(2) benchmark using the $L_{2}$ error metric from
-   ~\citet{Liu2023}. Entries are mean $\pm$ standard deviation over 500
+   ~\citet{yixuan_vnpc}. Entries are mean $\pm$ standard deviation over 500
     independent realisations. Smaller values are better.}
     \label{tab:var2_l2_results}
     \footnotesize
