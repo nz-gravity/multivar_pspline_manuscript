@@ -59,6 +59,7 @@ overleaf:
   # List of files to pull from Overleaf
   pull:
     - src/tex/ms.tex
+    - src/tex/bib.bib
     # - src/tex/blocked_likelihood_tikz.tex
     # - src/tex/definitions_table.tex 
 # Always require all input files to be present on disk for workflow to pass?
