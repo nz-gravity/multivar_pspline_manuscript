@@ -584,8 +584,8 @@
 	of magnitude larger and the resulting log-likelihood curvature drives
 	both posterior over-concentration and, at sufficiently large
 	$N_{b}N_{h}$, sampler pathologies (maximum tree-depth saturation in
-	NUTS). An $\eta$-sensitivity study on \texttt{noise4a}, reported in
-	Appendix~\ref{app:eta_sweep}, motivates the choice $\eta=0.5$ used
+	NUTS). An $\eta$-sensitivity study reported in
+	Appendix~\ref{app:eta_sweep}, motivates the choice $\eta$ used
 	for the LISA results.
 
 
@@ -871,12 +871,12 @@
 	time-delay interferometry (TDI) Michelson channels $X_{2}$, $Y_{2}$,
 	$Z_{2}$ from a publicly released LISA TDI dataset
 	\citep{lisa_noise4a, lisa_noise5a}. The data were generated with
-	\texttt{lisainstrument}~\citep{bayle2024lisainstrument} under the LDC Spritz
+	\texttt{lisainstrument}~\citep{lisainstrument} under the LDC Spritz
 	noise model~\citep{ldcspritz} at a sampling rate of
 	$f_{s}=0.5$\,Hz and constant $8.3$\,s light travel times. The six
 	inter-spacecraft interferometer (ISI) and test-mass (TM) link
 	measurements were propagated through \texttt{pytdi}
-	\citep{staab2022pytdi} to produce the TDI 2.0 Michelson combinations used
+	\citep{staab_pytdi_2025} to produce the TDI 2.0 Michelson combinations used
 	here. Two noise configurations are released:
 	\begin{itemize}
 		\item \texttt{noise4a} --- symmetric realisation: all six MOSAs
