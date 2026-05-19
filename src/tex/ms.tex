@@ -147,7 +147,7 @@
 		benchmarks with known ground truth, the method accurately recovers
 		diagonal and cross-spectral structure, attains near-nominal coverage, and
 		achieves low relative integrated absolute error (RIAE) that improves with
-		sample size and is robust across a broad range of spline basis sizes. We
+		sample size. We
 		illustrate the relevance to LISA by estimating the multichannel noise
 		spectral matrix for time-delay interferometry combinations, and
 		demonstrate that AET-restricted models fail on realistic asymmetric
@@ -173,8 +173,8 @@
     that matter for joint inference.
      
     Nonparametric/flexible Bayesian approaches to PSD estimation have a well-developed
-    statistical foundation, characterised by an expansion of the PSD in terms of an
-    infinite/large number of basis functions combined with noninformative priors on the
+    statistical foundation, characterised by an expansion of the PSD in terms of a
+    potentially large or infinite number of basis functions combined with noninformative priors on the
     coefficients. Examples include
     Bernstein polynomials with weights induced by Dirichlet process priors~\citep{beyond_whittle},
     cosines with a discounted regularized horseshoe prior~\citep{jianan_vi_sgvb_et}, and
@@ -204,7 +204,7 @@
     These univariate approaches model each channel independently. This is
     justified in the idealised equal-arm stationary LISA configuration, which
     has vanishing off-diagonal cross-spectra between the three TDI channels,
-    but realistic noise (unequal arm lengths, per-MOSA imbalance, and
+    but realistic noise (unequal arm lengths, per-MOSA (Movable Optical Sub-Assembly) imbalance, and
     instrumental breathing~\citep{muratore2021instrumental}) generates
     non-trivial off-diagonal entries in the $3\times 3$ spectral density
     matrix $\S(f)$, whose normalised magnitudes (the channel-pair
@@ -254,7 +254,7 @@
     relative integrated absolute error while the full multivariate model
     recovers the cross-spectral structure. A further benchmark against the
     bivariate estimators of \citet{yixuan_vnpc} on a VAR(2) problem with
-    closed-form ground truth is reported in Appendix~\ref{app:bivariate}.
+    closed-form ground truth is reported in Appendix~\ref{app:var2_appendix}.
      
     The remainder of the paper is organised as follows.
     Section~\ref{sec:psplines} develops the statistical model and the
@@ -316,7 +316,7 @@
 	whose magnitude is zero when channels $i$ and $j$ are uncorrelated at
 	frequency $f$ and unity when they are perfectly linearly related.
 	We use $|C_{ij}(f)|$ to visualise off-diagonal recovery in
-	Sec.~\ref{sec:application}.
+	the LISA application (Sec.~\ref{subsec:lisa}).
 
 	\paragraph*{Blocking.}
 	To trade frequency resolution for periodogram stability we partition
@@ -365,8 +365,8 @@
 	from summing $N_{b}$ assumed-independent single-block periodogram
 	contributions:
 	\begin{align}
-	\I^{(i)}(f_{k})&\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),1),\\
-	\Y(f_{k})&\sim\mathcal{CW}_{d}(T_{b}\S(f_{k}),N_{b}).
+	\I^{(i)}(f_{k})&\sim\mathcal{CW}_{p}(T_{b}\S(f_{k}),1),\\
+	\Y(f_{k})&\sim\mathcal{CW}_{p}(T_{b}\S(f_{k}),N_{b}).
 	\end{align}
 	\paragraph*{Eigendecomposition.}
 	Because $\Y(f_{k})$ is Hermitian positive semidefinite, it admits an
@@ -407,10 +407,10 @@
 
 	Under the assumption that $\S(f)\approx\S(\bar{f}_{h})$ across each $J_{h}$,
 	the $\Y(f)$ within the bin are approximately i.i.d.\
-	$\mathcal{CW}_{d}(T_b\S(\bar{f}_{h}), N_{b})$, and by the additivity of the
+	$\mathcal{CW}_{p}(T_b\S(\bar{f}_{h}), N_{b})$, and by the additivity of the
 	complex Wishart under a common scale matrix,
 	\begin{equation}
-		\Y_{h}^{*}\;\dot\sim\;\mathcal{CW}_{d}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
+		\Y_{h}^{*}\;\dot\sim\;\mathcal{CW}_{p}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
 	\end{equation}
 	The approximation is only as good as the constant-$\S$ assumption, so bin
 	edges must avoid sharp spectral features (peaks, lines, transfer-function
@@ -584,7 +584,7 @@
 	both posterior over-concentration and, at sufficiently large
 	$N_{b}N_{h}$, sampler pathologies (maximum tree-depth saturation in
 	NUTS). An $\eta$-sensitivity study reported in
-	Appendix~\ref{app:eta_sweep}, motivates the choice $\eta$ used
+	Appendix~\ref{app:eta_sweep} motivates the choice of $\eta$ used
 	for the LISA results.
 
 
@@ -638,7 +638,10 @@
 	described below.
 
 	We place hierarchical priors on the spline coefficients to enforce smoothness.
-	For each component $j$:
+	Each spline component (the diagonal log-variances $\log\delta_{j}^{2}$ and
+	the real and imaginary parts of each off-diagonal entry $\theta_{jl}$) is
+	assigned its own pair of precision hyperparameters; with a slight abuse of
+	notation we index a generic such component by $j$:
 	\begin{align}
 		\bold{w}_{j} | \phi_{j} & \sim \mathcal{N}(\bold{0}, (\phi_{j} \widetilde{\bold{P}}_{j})^{-1})  \\
 		\phi_{j} | \delta_{j}   & \sim \text{Gamma}(\alpha_{\phi}, \delta_{j} \beta_{\phi}) \\
@@ -781,9 +784,9 @@
 
 	Table~\ref{tab:3d_var2_results} reports a representative slice of the
 	$(N_{b},N_{h})$ grid. Coverage is near-nominal (89.8--90.8\%) across
-	every configuration, and the mean RIAE varies by less than 2\% across
+	every configuration, and the mean RIAE varies by less than 3\% across
 	the grid. The number of retained frequency bins $N_{c}$ falls by a
-	factor of up to 64 between the finest ($N_{b}=1$, no coarse-graining) and
+	factor of up to 32 between the finest ($N_{b}=1$, no coarse-graining) and
 	coarsest ($N_{b}=16$, $N_{h}=2$) configurations, with no measurable
 	loss of accuracy or calibration. MCMC convergence is satisfactory
 	across all cells: $\hat{R}\leq 1.01$ for all parameters, negligible
@@ -869,7 +872,7 @@
 	$Z_{2}$ from a publicly released LISA TDI dataset
 	\citep{lisa_noise4a, lisa_noise5a}. The dataset was
 	produced with \texttt{lisainstrument}~\citep{lisainstrument} under the
-	LDC Spritz noise model~\citep{ldcspritz} at a sampling rate of
+	LISA Data Challenge (LDC) Spritz noise model~\citep{ldcspritz} at a sampling rate of
 	$f_{s}=0.5$\,Hz and constant $8.3$\,s light travel times. The six
 	inter-spacecraft interferometer (ISI) and test-mass (TM) link
 	measurements were propagated through \texttt{pytdi}
@@ -877,7 +880,7 @@
 	here. Two noise configurations are released:
 	\begin{itemize}
 		\item \texttt{noise4a}~\cite{lisa_noise4a} --- symmetric realisation: all six MOSAs
-		are assigned identical OMS (ISI carrier) and test-mass acceleration
+		are assigned identical Optical Metrology System (OMS; ISI carrier) and test-mass acceleration
 		amplitude spectral densities equal to the LDC baseline values
 		($2.4\times10^{-15}$\,m\,s$^{-2}$/$\sqrt{\mathrm{Hz}}$ and
 		$7.9\times10^{-12}$\,m/$\sqrt{\mathrm{Hz}}$, respectively). In this
@@ -901,7 +904,7 @@
 	\end{itemize}
 	We fit each dataset under two competing hypotheses for the
 	$3\times3$ noise cross-spectrum, designed to test whether the
-	XYZ$\to$AET orthogonal transformation diagonalises the LISA
+	XYZ$\to$AET orthogonal transformation (the noise-orthogonal $A$, $E$, $T$ TDI combinations) diagonalises the LISA
 	noise covariance to within statistical resolution:
 	\begin{itemize}
 		\item $\mathcal{H}_{XYZ}$ --- the cross-spectral matrix has
@@ -998,8 +1001,8 @@
 			the AET-rotated model with restricted off-diagonal basis
 			($\mathcal{H}_{AET}$, $K_{\theta}=10$), at three
 			observation durations. $N_{b}$ is the number of Wishart
-			time blocks (chosen to give $\sim 7$-day blocks:
-			$\lfloor T/(7\,\text{d})\rfloor$) and $N_{c}$ is set to
+			time blocks (chosen to give blocks of approximately
+			seven days in length) and $N_{c}$ is set to
 			$1024$. RIAE is the Frobenius-norm relative integrated
 			absolute error of the posterior-median spectral matrix
 			against the analytic reference (closed-form equal-link
@@ -1052,7 +1055,7 @@
 	\end{figure*}
 
 	Figure~\ref{fig:lisa_eta0p5} overlays the three durations for both
-	datasets under the $\mathcal{H}_{XYZ}$ model. The diagonal
+	datasets under the $\mathcal{H}_{XYZ}$ model. The
 	diagonal PSDs are recovered with sub-percent bias and CI widths that
 	contract with $\sqrt{T}$, while the off-diagonal coherences (the
 	cross-channel quantities most directly tied to
@@ -1086,7 +1089,7 @@
 	$\eta$-tempering yields near-nominal 90\% credible-interval coverage
 	($\approx 0.91$) across a wide $(N_{b},N_{h})$ grid on the 3D VAR(2)
 	benchmark, while reducing the number of inference-time frequency bins by
-	up to two orders of magnitude.
+	up to a factor of $32$.
 
 	On the synthetic 3D VAR(2) benchmark the un-tempered estimator
 	($\eta=1$) achieves coverage $\approx\!0.91$ at every $(N_{b},N_{h})$
