@@ -248,8 +248,8 @@
     stochastic variational approximation~\citep{hoffman2013_SVI}, with
     sampling performed by the No-U-Turn Sampler~\citep{hoffman2014_NUTS}.
     We validate the method on a three-channel VAR(2) simulation with known
-    ground truth, and on simulated LISA TDI data in a symmetric and a
-    physically realistic asymmetric per-MOSA noise configuration. In the
+    ground truth, and on publicly released simulated LISA TDI datasets in a
+    symmetric and a physically realistic asymmetric per-MOSA noise configuration. In the
     asymmetric case an AET-restricted model fails by an order of magnitude in
     relative integrated absolute error while the full multivariate model
     recovers the cross-spectral structure. A further benchmark against the
@@ -259,7 +259,7 @@
     The remainder of the paper is organised as follows.
     Section~\ref{sec:psplines} develops the statistical model and the
     inference scheme. Section~\ref{sec:application} presents simulation
-    studies on a 3D VAR(2) benchmark and on simulated LISA TDI data.
+    studies on a 3D VAR(2) benchmark and on publicly released simulated LISA TDI data.
     Section~\ref{sec:discussion} summarises the results, discusses limitations
     and future directions.
 
@@ -350,13 +350,12 @@
 	block-averaged periodogram (the Welch estimator), and applying the
 	trace cyclic property $\tr(ABC)=\tr(CAB)$, the blocked likelihood
 	reduces to
-	\begin{equation}
+	\begin{align}
 		\label{eq:blocked-trace}
-		\mathcal{L}_{b}(\d|\S)
-		\propto \prod_{k=1}^{n/(2N_{b})}
-		\left|\S(f_{k})\right|^{-N_{b}}
-		\exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(f_{k})^{-1}\Y(f_{k})\right]\right).
-	\end{equation}
+		\mathcal{L}_{b}(\d|\S) & \propto \prod_{k=1}^{n/(2N_{b})}
+		\left|\S(f_{k})\right|^{-N_{b}}\times \nonumber \\
+		                       & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(f_{k})^{-1}\Y(f_{k})\right]\right).
+	\end{align}
 
 	Under the asymptotic Gaussian approximation, $\Y(f_{k})$ follows a
 	complex Wishart distribution\footnote{We write
@@ -394,12 +393,12 @@
 	parameters, which is the form that factorises into the per-channel
 	regressions below.
 
-	\paragraph{Coarse graining.}
+	\paragraph*{Coarse graining.}
 	Blocking reduces the number of periodogram matrices from $N$ to
 	$n/(2N_{b})$, but each of the remaining frequencies still requires a
 	separate evaluation of $\S(f_{k})^{-1}$. Where $\S(f)$ is slowly
-	varying, we can pool adjacent frequencies to gain further speed at
-	negligible accuracy cost. Partition the block frequencies into
+	varying, we can pool adjacent frequencies to gain further speed
+	(illustrated in Fig.~\ref{fig:blocked_likelihood}). Partition the block frequencies into
 	$N_{c}$ disjoint subsets
 	$\{f_{1},\ldots,f_{n/(2N_{b})}\}=\bigcup_{h=1}^{N_{c}}J_{h}$, each
 	containing $N_{h}$ adjacent frequencies with midpoint $\bar{f}_{h}$. 
@@ -441,12 +440,12 @@
 	replaced by $N_{c}$ coarse bins and a Wishart shape parameter
 	$N_{b}N_{h}$ (the number of fine periodograms summed per coarse
 	bin):
-	\begin{equation}
+	\begin{align}
 		\label{eq:log-like-coarse}
-		\mathcal{L}_{b,c}(\d|\S)
-		\propto \prod_{h=1}^{N_{c}} \left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}
-		\exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{*}\right]\right),
-	\end{equation}
+		\mathcal{L}_{b,c}(\d|\S) & \propto \prod_{h=1}^{N_{c}}
+		\left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}\times \nonumber \\
+		                         & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{*}\right]\right),
+	\end{align}
 	with eigendecomposition 
 	\begin{align}
 	\Y_{h}^{*}&=\sum_{\nu=1}^{p} \u^{(h)}_{\nu}\u^{(h)*}_{\nu}\, ,\\
@@ -525,11 +524,11 @@
 	priors across these three parameter blocks,
 	\begin{align}
 		\pi(\bdelta_{1},\bdelta_{2},\btheta_{2}, & \bdelta_{3},\btheta_{3}) = \notag                                                                         \\
-		                                         & \pi(\bdelta_{1})\,\pi(\bdelta_{2},\btheta_{2})\,\pi(\bdelta_{3},\btheta_{3}),                             \\
+		                                         & \pi_{1}(\bdelta_{1})\,\pi_{2}(\bdelta_{2},\btheta_{2})\,\pi_{3}(\bdelta_{3},\btheta_{3}),                             \\
 		p(\bdelta_{1},\bdelta_{2},\btheta_{2},   & \bdelta_{3},\btheta_{3}\mid \d) \propto \notag                                    \\
-		                                         & \mathcal{L}_{1}(\bdelta_{1})\,\pi(\bdelta_{1})\times \notag                                  \\
-		                                         & \mathcal{L}_{2}(\bdelta_{2},\btheta_{2})\,\pi(\bdelta_{2},\btheta_{2})\times \notag \\
-		                                         & \mathcal{L}_{3}(\bdelta_{3},\btheta_{3})\,\pi(\bdelta_{3},\btheta_{3}).
+		                                         & \mathcal{L}_{1}(\bdelta_{1})\,\pi_{1}(\bdelta_{1})\times \notag                                  \\
+		                                         & \mathcal{L}_{2}(\bdelta_{2},\btheta_{2})\,\pi_{2}(\bdelta_{2},\btheta_{2})\times \notag \\
+		                                         & \mathcal{L}_{3}(\bdelta_{3},\btheta_{3})\,\pi_{3}(\bdelta_{3},\btheta_{3}).
 	\end{align}
 	Hence Bayes' rule yields three independent posterior factors corresponding to $\bdelta
 	_{1}$, $(\bdelta_{2},\btheta_{2})$, and $(\bdelta_{3},\btheta_{3})$. This
@@ -635,10 +634,8 @@
 	a draw of a stochastic variational approximation to the posterior, to
 	bypass the expensive NUTS adaptation in low-mass-curvature regions.
 	Fourth, we sample the warm-started posterior with NUTS and assess
-	convergence with standard chain diagnostics. The first two stages
-	are described below, and the remaining two stages are described in
-	the \emph{Implementation} and \emph{Convergence diagnostics}
-	paragraphs that follow.
+	convergence with standard chain diagnostics. Each stage is
+	described below.
 
 	We place hierarchical priors on the spline coefficients to enforce smoothness.
 	For each component $j$:
@@ -772,7 +769,7 @@
 	smoother posterior medians than the raw periodogram, and the two
 	posterior medians track each other closely ($\mathrm{RIAE}=0.114$
 	for NUTS versus $0.102$ for SVI). The SVI credible bands, however,
-	are visibly narrower than those of NUTS: for this realisation the
+	are narrower than those of NUTS: for this realisation the
 	empirical 90\% coverage drops from $88\%$ under NUTS to $83\%$ under
 	SVI. This is the well-known under-dispersion of mean-field/low-rank
 	Gaussian variational approximations, and it is why we use SVI only
@@ -870,9 +867,9 @@
 	We apply the multivariate P-spline model to the three second-generation
 	time-delay interferometry (TDI) Michelson channels $X_{2}$, $Y_{2}$,
 	$Z_{2}$ from a publicly released LISA TDI dataset
-	\citep{lisa_noise4a, lisa_noise5a}. The data were generated with
-	\texttt{lisainstrument}~\citep{lisainstrument} under the LDC Spritz
-	noise model~\citep{ldcspritz} at a sampling rate of
+	\citep{lisa_noise4a, lisa_noise5a}. The dataset was
+	produced with \texttt{lisainstrument}~\citep{lisainstrument} under the
+	LDC Spritz noise model~\citep{ldcspritz} at a sampling rate of
 	$f_{s}=0.5$\,Hz and constant $8.3$\,s light travel times. The six
 	inter-spacecraft interferometer (ISI) and test-mass (TM) link
 	measurements were propagated through \texttt{pytdi}
@@ -944,9 +941,20 @@
 	excised with half-width $1$\,mHz prior to fitting. All other settings
 	follow Section~\ref{sec:bayesian-inference}.
 
-	Table~\ref{tab:lisa_results} summarises convergence and CI-width
-	diagnostics for the two models, two datasets, and three observation
-	durations. All twelve LISA runs satisfy the convergence diagnostics of
+	In addition to the RIAE introduced in Section~\ref{subsec:sim_3d_var2},
+	we report the median relative width of the 90\% credible band on the
+	diagonal PSDs,
+	\begin{equation}
+		\label{eq:delta_psd}
+		\Delta_{\mathrm{PSD}} = \operatorname{median}_{f}
+		\frac{\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)}{\hat{S}^{50\%}(f)},
+	\end{equation}
+	computed in the XYZ basis for both models. This complements the RIAE
+	(a bias metric) with a summary of posterior precision.
+	Table~\ref{tab:lisa_results} reports RIAE, $\Delta_{\mathrm{PSD}}$, and
+	wall-clock duration for the two models, two datasets, and three
+	observation durations. All twelve LISA runs satisfy the convergence
+	diagnostics of
 	Section~\ref{sec:bayesian-inference}: $\hat R<1.01$ for all parameters,
 	bulk and tail ESS exceeding $400$, E-BFMI~$>0.3$, and no problematic
 	divergent transitions or tree-depth saturation. The results split sharply along the
@@ -985,7 +993,7 @@
 		\centering
 		\caption{LISA TDI $X_{2}Y_{2}Z_{2}$ results at fixed safe-Bayes
 			tempering $\eta=0.5$ for the symmetric (\texttt{noise4a}) and
-			asymmetric (\texttt{noise5a}) simulations, fit with the
+			asymmetric (\texttt{noise5a}) datasets, fit with the
 			unrestricted multivariate XYZ model ($\mathcal{H}_{XYZ}$) and
 			the AET-rotated model with restricted off-diagonal basis
 			($\mathcal{H}_{AET}$, $K_{\theta}=10$), at three
@@ -1065,23 +1073,6 @@
 	functions directly into the prior mean (rather than only excising
 	a $1$\,mHz window around each null) may be a natural way to
 	suppress this artefact and is left for future work.
-	Wall-clock runtime grows much more slowly
-	than the data volume: a $12\times$ increase in mission duration
-	($1$\,mo $\to 1$\,yr) costs only a $\sim\!7\times$ increase in
-	wall time for $\mathcal{H}_{XYZ}$. The 1-month and 6-month fits
-	($\sim\!120$--$245$\,s) are dominated by fixed NUTS warm-up and
-	SVI overhead, while the 1-year fit ($\sim\!850$--$1090$\,s) begins
-	to expose the per-gradient $\mathcal{O}(p\,N_{b}\,N_{c}\,K)$ cost
-	as $N_{b}$ reaches $52$. Even the 1-year fit completes in under
-	twenty minutes on a single 4-core CPU node, roughly a
-	$2\times$ speed-up at 1\,month and $1.5\times$ at 6\,months over
-	the previous-generation single-model pipeline, with comparable
-	throughput at 1\,year. The $\mathcal{H}_{AET}$ model is
-	consistently faster than $\mathcal{H}_{XYZ}$ at fixed duration
-	(e.g.\ $632$\,s vs.\ $853$\,s at 1\,yr on \texttt{noise4a}),
-	reflecting the smaller off-diagonal basis, but at the cost of the
-	order-of-magnitude RIAE inflation on the asymmetric
-	\texttt{noise5a} regime.
 
 	\section{Discussion}
 	\label{sec:discussion}
@@ -1115,10 +1106,7 @@
 	A complementary direction is to replace $\eta$-tempering with a
 	debiased Whittle likelihood~\citep{sykulski2019_debiased}, which
 	corrects the finite-sample bias of the periodogram analytically
-	rather than down-weighting the entire likelihood. A debiased
-	formulation may reduce the reliance on $\eta$-tempering by correcting
-	finite-sample bias analytically, though steep likelihood curvature
-	from high $N_b N_h$ would likely persist and still require attenuation.
+	rather than down-weighting the entire likelihood.
 
 	\paragraph{Informative priors.}
 	The hierarchical Gaussian smoothing prior used here is
@@ -1131,11 +1119,10 @@
 	a fast initial estimate of $\log\delta_{j}^{2}(f)$ and the
 	off-diagonal Cholesky terms (e.g.\ from a Welch-and-smooth pre-pass),
 	with $\phi_{j}$ controlling allowed deviations from that estimate,
-	would (i) make the smoothing hyperparameters physically meaningful as
+	may (i) make the smoothing hyperparameters physically meaningful as
 	fractional excursion bounds, (ii) shorten warm-up substantially, and
 	(iii) reduce the prior--data contention that drives over-coverage at
-	small $\eta$ in the appendix sweep. We expect this to give the largest
-	practical improvement for production LISA pipelines.
+	small $\eta$ in the appendix sweep.
 
 	\paragraph{Non-stationarity.}
 	The Whittle likelihood assumes wide-sense stationarity. Both
@@ -1159,30 +1146,17 @@
 	\paragraph{Improved variational families.}
 	As reported in Section~\ref{subsec:sim_3d_var2}, the current low-rank
 	($r=16$) multivariate Gaussian SVI guide recovers an accurate
-	posterior median but produces visibly narrower credible bands than
-	NUTS, with a corresponding drop in empirical coverage. It is also
-	too restrictive to represent the heavy tails or weak multi-modality
-	occasionally seen in the off-diagonal Cholesky weights at small
-	$\eta$. NUTS is therefore retained as the production sampler in this
-	work, and SVI is used only as an initialiser. Because the model is
-	implemented in NumPyro, the variational family is a swappable
-	component: replacing the Gaussian guide with a normalising flow
-	(e.g.\ a neural spline flow or a masked autoregressive / inverse
-	autoregressive flow) is essentially a one-line change. A systematic
-	study of which variational families recover calibrated PSD
-	posteriors --- so that SVI could serve as a stand-alone approximation
-	at a fraction of the NUTS wall-clock cost, attractive for the
-	routine, parameter-estimation-grade PSD updates expected over the
-	LISA mission lifetime --- is left for future work, as is a
-	corresponding ablation of NUTS with and without the SVI warm-start
-	(quantifying its effect on warm-up length, divergences, and
-	time-to-convergence). A further speculative direction is to use the
-	variational posterior not only to initialise NUTS but to recentre
-	the spline-weight priors on the variational mean, with the
-	variational scale informing the prior width. The trade-off is that
-	this makes the prior data-dependent and informative, which is
-	undesirable when calibration of the final posterior is the goal. We
-	flag it as a direction worth exploring rather than recommend it.
+	posterior median but produces narrower credible bands than NUTS,
+	with a corresponding drop in empirical coverage. NUTS is therefore
+	retained as the production sampler, and SVI is used only as an
+	initialiser. Because the model is implemented in NumPyro, the
+	variational family is a swappable component: replacing the Gaussian
+	guide with a normalising flow (e.g.\ a neural spline flow or a
+	masked autoregressive / inverse autoregressive flow) is essentially
+	a one-line change. A systematic study of which variational families
+	recover calibrated PSD posteriors --- so that SVI could serve as a
+	stand-alone approximation at a fraction of the NUTS wall-clock cost
+	--- is left for future work.
 
 	\paragraph{Other extensions.}
 	The within-bin constant-$\S$ approximation underlying coarse-graining
