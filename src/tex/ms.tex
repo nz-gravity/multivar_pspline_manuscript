@@ -621,7 +621,12 @@
 	Unlike the finite-difference approximation
 	$\bold{D}_{2}^{\top}\bold{D}_{2}$ used in the original P-spline
 	formulation of~\citet{EilersMarx1996}, this integral form is exact for
-	non-uniform knot sequences~\citep{Wand2008}.
+	non-uniform knot sequences~\citep{Wand2008}. 
+	Note that the integral
+	form of $\bold{P}_{j}$ is the same for every component. 
+	The $j$-subscript reflects only that the knot sequence and basis size
+	$K_{j}$ are placed adaptively per component, so the resulting $K_{j}\times K_{j}$ matrix differs
+	across~$j$.
 
 	\subsection{Bayesian Inference}
 	\label{sec:bayesian-inference}
@@ -644,16 +649,23 @@
 	notation we index a generic such component by $j$:
 	\begin{align}
 		\bold{w}_{j} | \phi_{j} & \sim \mathcal{N}(\bold{0}, (\phi_{j} \widetilde{\bold{P}}_{j})^{-1})  \\
-		\phi_{j} | \delta_{j}   & \sim \text{Gamma}(\alpha_{\phi}, \delta_{j} \beta_{\phi}) \\
-		\delta_{j}              & \sim \text{Gamma}(\alpha_{\delta}, \beta_{\delta})
+		\phi_{j} | \nu_{j}   & \sim \text{Gamma}(\alpha_{\phi}, \nu_{j} \beta_{\phi}) \\
+		\nu_{j}              & \sim \text{Gamma}(\alpha_{\nu}, \beta_{\nu})
 	\end{align}
 	where $\bold{w}_{j}$ is the vector of spline coefficients and
-	$\phi_{j}$, $\delta_{j}$ are precision hyperparameters. We use
-	$\widetilde{\bold{P}}_{j}=\bold{P}_{j}+\epsilon\,\mathbf{I}$ with
+	$\phi_{j}$, $\nu_{j}$ are precision hyperparameters.
+	\footnote{In the
+	closely related univariate constructions of
+	\citet{maturana-russel_bayesian_2021} and \citet{aimen2026lisa}
+	this hyperparameter is denoted $\delta_{j}$. 
+	We use $\nu_{j}$ here to
+	avoid collision with the Cholesky diagonal entries $\delta_{jk}^{2}$
+	introduced in Section~\ref{sec:psplines} above.}
+	We use $\widetilde{\bold{P}}_{j}=\bold{P}_{j}+\epsilon\,\mathbf{I}$ with
 	$\epsilon=10^{-6}$ to ensure the prior precision is strictly positive
 	definite. Unless stated otherwise, the results below use
 	$\alpha_{\phi}=\beta_{\phi}=1$ and
-	$\alpha_{\delta}=\beta_{\delta}=1$.
+	$\alpha_{\nu}=\beta_{\nu}=1$.
 
 	Combining the $\eta$-tempered likelihood
 	(Eq.~\ref{eq:eta-tempered}) with these priors and the Cholesky
@@ -687,9 +699,10 @@
 	\paragraph{Implementation.}
 	We implement the model in \textsc{JAX}~\cite{jax2018github} with
 	NumPyro~\cite{phan2019numphyro}, exploiting automatic differentiation
-	and JIT compilation for gradient-based sampling. Throughout we use
-	degree-2 B-splines with second-order difference penalties. Positive
-	precision parameters $\phi_{j}$ and $\delta_{j}$ are sampled on the
+	and just-in-time (JIT) compilation for gradient-based sampling.
+	Throughout we use degree-2 B-splines with second-order derivative
+	penalties (the integral form of Eq.~\eqref{eq:Pj}). Positive
+	precision parameters $\phi_{j}$ and $\nu_{j}$ are sampled on the
 	log scale to keep the sampler away from the boundary at zero, and
 	the frequency grid is standardised to $[0,1]$ for numerical
 	stability of the B-spline basis evaluation. To initialise the spline
@@ -852,13 +865,17 @@
 		\centering
 		\includegraphics[width=1\linewidth]{vi_vs_nuts_var3.pdf}
 		\caption{Representative $3\times3$ spectral density matrix estimate for a
-			single $n=16{,}384$ VAR(2) realisation (NUTS: $\mathrm{RIAE}=0.114$, 90\% CI
-			coverage $88\%$, SVI: $\mathrm{RIAE}=0.102$, 90\% CI coverage $83\%$). Each panel shows the raw periodogram (grey), the theoretical
-			spectrum (dotted black), and posterior medians with 90\% credible bands for NUTS
-			(blue) and SVI (orange). Diagonal panels ($S_{11}$, $S_{22}$, $S_{33}$) show
-			the power spectral densities, while the off-diagonal panels show the real and imaginary
-			parts of the cross-spectra on a linear vertical scale (the VAR(2) PSDs span less
-			than one decade, so all panels share a linear scale).
+			single $n=16{,}384$ VAR(2) realisation, fit with $K=10$, $N_{b}=4$,
+			$N_{h}=4$ and $\eta=1$ (NUTS: $\mathrm{RIAE}=0.114$, 90\% CI
+			coverage $88\%$; SVI: $\mathrm{RIAE}=0.102$, 90\% CI coverage $83\%$).
+			Each panel shows the coarse-grained periodogram statistic
+			$\Y_{h}^{*}/(T_{b}N_{b}N_{h})$ (grey), the theoretical spectrum
+			(dotted black), and posterior medians with 90\% credible bands for
+			NUTS (blue) and SVI (orange). Diagonal panels ($S_{11}$, $S_{22}$,
+			$S_{33}$) show the power spectral densities, while the off-diagonal
+			panels show the real and imaginary parts of the cross-spectra on
+			a linear vertical scale (the VAR(2) PSDs span less than one decade,
+			so all panels share a linear scale).
 		}
 		\label{fig:vi_vs_nuts_var3}
 		\script{plot_var3.py}
@@ -1114,7 +1131,7 @@
 	\paragraph{Informative priors.}
 	The hierarchical Gaussian smoothing prior used here is
 	near-uninformative: each weight has marginal variance set by a
-	high-level hyperparameter ($\phi_{j}, \delta_{j}$) with no scale
+	high-level hyperparameter ($\phi_{j}, \nu_{j}$) with no scale
 	imposed by the data ahead of inference. In practice this places no
 	bound on where the spline curves can sit, and most of NUTS
 	warm-up is spent locating a region of weight space consistent with
@@ -1185,8 +1202,8 @@
 
 
 	\begin{acknowledgments}
-		We thank Martina Muratore, Federico Pozzoli, Nikolaos Karnesis, Quentin
-		Baghi, Jean-Baptiste Bayle, Ollie Burke, and others in the LISA Noise Non-Stationarities
+		We thank Quentin Baghi, Jean-Baptiste Bayle, Ollie Burke, Nikolaos
+		Karnesis, Martina Muratore, Federico Pozzoli, and others in the LISA Noise Non-Stationarities
 		Group (part of the ``Deep analysis group'' of the Distributed Data Processing
 		Centre, DDPC) for helpful discussions. We additionally thank Jean-Baptiste
 		Bayle for providing the LISA dataset, and the University of Glasgow for the computing
