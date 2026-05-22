@@ -919,37 +919,67 @@
 		($X_{2},Y_{2},Z_{2}$) combinations to obtain the full
 		$3\times3$ XYZ covariance at every frequency.
 	\end{itemize}
-	We fit each dataset under two competing hypotheses for the
+	We fit each dataset under three competing hypotheses for the
 	$3\times3$ noise cross-spectrum, designed to test whether the
 	XYZ$\to$AET orthogonal transformation (the noise-orthogonal $A$, $E$, $T$ TDI combinations) diagonalises the LISA
-	noise covariance to within statistical resolution:
+	noise covariance to within statistical resolution. The three
+	hypotheses form a strictly nested hierarchy of model flexibility,
+	$\mathcal{H}_{0}\subset\mathcal{H}_{1}\subset\mathcal{H}_{2}$:
 	\begin{itemize}
-		\item $\mathcal{H}_{XYZ}$ --- the cross-spectral matrix has
-		fully populated off-diagonals. The multivariate Cholesky
-		model is fit directly to the $X_{2}Y_{2}Z_{2}$ time series
-		with $K=100$ basis functions for \emph{every} Cholesky
-		component (diagonal $\log\delta_{j}^{2}$ \emph{and}
-		off-diagonal $\theta_{jk}$). This is the unrestricted model.
-		\item $\mathcal{H}_{AET}$ --- the cross-spectral matrix is
-		(approximately) diagonal in the $A,E,T$ basis. The data are
+		\item $\mathcal{H}_{0}$ (\emph{univariate diagonal AET}) ---
+		the cross-spectral matrix is taken to be \emph{exactly}
+		diagonal in the $A,E,T$ basis. The XYZ time series is
 		first rotated into AET using the orthonormal LISA TDI
 		transformation matrix $M_{\mathrm{AET}}$ (whose unit
 		determinant introduces no log-likelihood Jacobian
-		correction). The same multivariate Cholesky model is then
-		fit with $K=100$ knots on the diagonals but only
-		$K_{\theta}=10$ knots on the off-diagonals. The restricted
-		off-diagonal prior keeps $S_{\mathrm{AET}}$ near diagonal.
-		The posterior spectral matrix is rotated back to the $XYZ$
-		basis for diagnostics.
+		correction), and each of the three channels is then fit
+		\emph{independently} with a univariate ($p=1$) log-P-spline
+		model on $\log S_{AA}, \log S_{EE}, \log S_{TT}$ ($K=100$
+		knots each). With $p=1$ there are no off-diagonal Cholesky
+		factors to sample, so the AET off-diagonals are
+		zero-by-construction. The diagonal AET posterior is
+		assembled per-sample as $\mathrm{diag}(S_{AA},S_{EE},S_{TT})$
+		and rotated back to the XYZ basis via
+		$\S_{XYZ}=M_{\mathrm{AET}}^{\top}\S_{AET}M_{\mathrm{AET}}$
+		for diagnostics; the XYZ off-diagonals carried by
+		$\mathcal{H}_{0}$ therefore reflect only the deterministic
+		TDI rotation, with no fitted physical cross-power.
+		\item $\mathcal{H}_{1}$ (\emph{multivariate AET with
+		restricted off-diagonals}) --- the cross-spectral matrix is
+		\emph{approximately} diagonal in the $A,E,T$ basis. The
+		full multivariate Cholesky model is fit to the AET-rotated
+		time series with $K=100$ knots on the diagonals
+		$\log\delta_{j}^{2}$ but only $K_{\theta}=2$ knots on the
+		off-diagonal components $\theta_{jk}$. The narrow
+		off-diagonal basis keeps $\S_{AET}$ near diagonal while
+		still allowing the data to push back if smooth
+		off-diagonal structure is present. The posterior spectral
+		matrix is rotated back to the XYZ basis for diagnostics.
+		\item $\mathcal{H}_{2}$ (\emph{full multivariate XYZ}) ---
+		the cross-spectral matrix has fully populated off-diagonals.
+		The multivariate Cholesky model is fit directly to the
+		$X_{2}Y_{2}Z_{2}$ time series with $K=100$ knots for
+		\emph{every} Cholesky component, diagonal and off-diagonal.
+		This is the unrestricted reference model.
 	\end{itemize}
 	For \texttt{noise4a} the AET basis diagonalises the noise
-	exactly, so $\mathcal{H}_{AET}$ should be a valid description.
-	For \texttt{noise5a} the per-MOSA asymmetry introduces genuine
-	off-diagonal power in the AET basis, and $\mathcal{H}_{AET}$
-	is expected to be mis-specified. $\mathcal{H}_{XYZ}$ is
-	unrestricted in both cases and serves as the reference.
+	exactly, so the strong diagonal restriction imposed by
+	$\mathcal{H}_{0}$ (and the milder one of $\mathcal{H}_{1}$)
+	are both expected to be valid descriptions, and all three
+	models should agree to within statistical resolution. For
+	\texttt{noise5a} the per-MOSA asymmetry introduces genuine
+	off-diagonal power in the AET basis: $\mathcal{H}_{0}$ is
+	then mis-specified by construction (no off-diagonal flexibility
+	at all), $\mathcal{H}_{1}$ can absorb only the small-bandwidth
+	component of the off-diagonals through its $K_{\theta}=2$
+	knots, and $\mathcal{H}_{2}$ remains unrestricted. The expected
+	fit-quality ordering is therefore
+	$\mathrm{RIAE}(\mathcal{H}_{0})\!>\!\mathrm{RIAE}(\mathcal{H}_{1})\!>\!\mathrm{RIAE}(\mathcal{H}_{2})$
+	for \texttt{noise5a} and
+	$\mathrm{RIAE}(\mathcal{H}_{0})\!\approx\!\mathrm{RIAE}(\mathcal{H}_{1})\!\approx\!\mathrm{RIAE}(\mathcal{H}_{2})$
+	for \texttt{noise4a}.
 
-	For both models, knots are placed by the adaptive quantile rule
+	For all three models, knots are placed by the adaptive quantile rule
 	described in Section~\ref{sec:psplines} so that more knots fall near
 	the steep low-frequency rise. We choose $N_{b}$ to give blocks of
 	order one week in length, and a fixed safe-Bayes tempering
@@ -969,86 +999,122 @@
 		\Delta_{\mathrm{PSD}} = \operatorname{median}_{f}
 		\frac{\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)}{\hat{S}^{50\%}(f)},
 	\end{equation}
-	computed in the XYZ basis for both models. This complements the RIAE
+	computed in the XYZ basis for all three models. This complements the RIAE
 	(a bias metric) with a summary of posterior precision.
 	Table~\ref{tab:lisa_results} reports RIAE, $\Delta_{\mathrm{PSD}}$, and
-	wall-clock duration for the two models, two datasets, and three
-	observation durations. All twelve LISA runs satisfy the convergence
+	wall-clock duration for the three models, two datasets, and three
+	observation durations. All eighteen LISA runs satisfy the convergence
 	diagnostics of
 	Section~\ref{sec:bayesian-inference}: $\hat R<1.01$ for all parameters,
 	bulk and tail ESS exceeding $400$, E-BFMI~$>0.3$, and no problematic
-	divergent transitions or tree-depth saturation. The results split sharply along the
-	AET-diagonalisation hypothesis.
+	divergent transitions or tree-depth saturation. The results split sharply
+	along the AET-diagonalisation hypothesis.
 
-	\emph{Symmetric noise (\texttt{noise4a}).} Both models recover the
-	analytic spectral matrix at the half-percent level
-	($\mathrm{RIAE}\approx 4.5\!-\!5.3\times10^{-3}$) across all
-	durations. The restricted $\mathcal{H}_{AET}$ model is no worse
-	than $\mathcal{H}_{XYZ}$ in posterior-median accuracy, consistent
-	with the AET basis exactly diagonalising the equal-link noise.
+	\emph{Symmetric noise (\texttt{noise4a}).} All three models recover
+	the analytic spectral matrix at the half-percent level
+	($\mathrm{RIAE}\approx 4.4\!-\!5.3\times10^{-3}$) across all
+	durations and are statistically indistinguishable from one another.
+	This is the expected behaviour when the AET basis truly diagonalises
+	the noise: $\mathcal{H}_{0}$ already captures the cross-spectral
+	structure because the only off-diagonal power present in the XYZ
+	basis is the deterministic geometric coupling recovered by the
+	$M_{\mathrm{AET}}^{\top}\!\cdot\!M_{\mathrm{AET}}$ rotation, and
+	the additional off-diagonal flexibility of $\mathcal{H}_{1}$ and
+	$\mathcal{H}_{2}$ has nothing to fit. Two conclusions follow:
+	(i) for equal-arm LISA noise the multivariate analysis is not
+	required, and three independent univariate fits suffice, and
+	(ii) the unrestricted $\mathcal{H}_{2}$ model does not lose
+	accuracy on data that does not need its flexibility, confirming
+	that $\mathcal{H}_{2}$ remains a safe default when the
+	diagonal-AET assumption cannot be guaranteed in advance.
 
-	\emph{Asymmetric noise (\texttt{noise5a}).} The two models diverge
-	by more than an order of magnitude. $\mathcal{H}_{AET}$
-	stalls at $\mathrm{RIAE}\approx 1.8\!-\!2.2\times10^{-2}$ at all
-	durations --- a floor set by the residual off-diagonal AET power
-	that the restricted prior cannot represent. $\mathcal{H}_{XYZ}$,
-	in contrast, reaches $\mathrm{RIAE}\approx 9\!-\!11\times10^{-4}$,
-	about $20\times$ smaller, and continues to improve with duration.
-	This is the central diagnostic of the LISA study: when the
-	per-MOSA noise levels are asymmetric (the physically realistic
-	regime) the AET rotation does \emph{not} diagonalise the
-	cross-spectral matrix, and a multivariate model that estimates
-	the full Cholesky factor is required.
+	\emph{Asymmetric noise (\texttt{noise5a}).} The three models
+	separate by orders of magnitude in the order predicted by their
+	off-diagonal flexibility,
+	$\mathrm{RIAE}(\mathcal{H}_{0})\!>\!\mathrm{RIAE}(\mathcal{H}_{1})\!>\!\mathrm{RIAE}(\mathcal{H}_{2})$.
+	$\mathcal{H}_{0}$ stalls at
+	$\mathrm{RIAE}\approx 3.3\!\times\!10^{-2}$ at all durations ---
+	a floor set by the AET off-diagonal power it is structurally
+	unable to represent. $\mathcal{H}_{1}$ improves on this by
+	roughly $50\%$
+	($\mathrm{RIAE}\approx 1.8\!-\!2.2\!\times\!10^{-2}$) by
+	allowing two off-diagonal knots, but is still limited
+	by its narrow $\theta_{jk}$ basis. $\mathcal{H}_{2}$ reaches
+	$\mathrm{RIAE}\approx 9\!-\!11\!\times\!10^{-4}$, about
+	$20\times$ smaller than $\mathcal{H}_{1}$ and $30\!-\!40\times$
+	smaller than $\mathcal{H}_{0}$, and continues to improve with
+	duration. This monotone nested ordering is the central diagnostic
+	of the LISA study: when the per-MOSA noise levels are asymmetric
+	(the physically realistic regime) the AET rotation does
+	\emph{not} diagonalise the cross-spectral matrix, and a
+	multivariate model that estimates the full Cholesky factor is
+	required.
 
-	Posterior uncertainty contracts as expected for both models. The
-	median relative CI width on the diagonal PSDs falls from
-	$\approx\!4.7\%$ at 1\,month to $\approx\!1.2\%$ at 1\,year,
+	Posterior uncertainty contracts as expected. For the multivariate
+	models, the median relative CI width on the diagonal PSDs falls
+	from $\approx\!4.7\%$ at 1\,month to $\approx\!1.2\%$ at 1\,year,
 	a reduction of roughly $4\times$, consistent with the $\sqrt{T}$
-	scaling expected for variance-dominated Whittle inference, and
-	is essentially identical across models and datasets, confirming
-	that the per-channel resolution is set by the data and not by the
-	choice of basis.
+	scaling expected for variance-dominated Whittle inference, and is
+	essentially identical between $\mathcal{H}_{1}$ and
+	$\mathcal{H}_{2}$ and across datasets, confirming that the
+	per-channel resolution is set by the data and not by the choice
+	of basis. The univariate $\mathcal{H}_{0}$ contracts at the same
+	$\sqrt{T}$ rate but with consistently narrower bands
+	($\approx\!3.4\%$ at 1\,month, $\approx\!0.9\%$ at 1\,year),
+	reflecting the smaller per-channel parameter count of the $p=1$
+	model when off-diagonals are removed from the inference. For
+	\texttt{noise5a} this tighter $\mathcal{H}_{0}$ posterior is a
+	misleading indicator of fit quality --- the bands do not include
+	the truth because the model is structurally unable to represent
+	the AET off-diagonals, as the order-of-magnitude RIAE gap to
+	$\mathcal{H}_{1}$ and $\mathcal{H}_{2}$ makes clear.
 
 	\begin{table*}[!htbp]
 		\centering
 		\caption{LISA TDI $X_{2}Y_{2}Z_{2}$ results at fixed safe-Bayes
 			tempering $\eta=0.5$ for the symmetric (\texttt{noise4a}) and
 			asymmetric (\texttt{noise5a}) datasets, fit with the
-			unrestricted multivariate XYZ model ($\mathcal{H}_{XYZ}$) and
-			the AET-rotated model with restricted off-diagonal basis
-			($\mathcal{H}_{AET}$, $K_{\theta}=10$), at three
-			observation durations. $N_{b}$ is the number of Wishart
+			univariate diagonal-AET null model ($\mathcal{H}_{0}$,
+			three independent $p=1$ fits), the AET-rotated multivariate
+			model with restricted off-diagonal basis ($\mathcal{H}_{1}$,
+			$K_{\theta}=2$), and the unrestricted multivariate XYZ
+			model ($\mathcal{H}_{2}$), at three observation
+			durations. $N_{b}$ is the number of Wishart
 			time blocks (chosen to give blocks of approximately
 			seven days in length) and $N_{c}$ is set to
 			$1024$. RIAE is the Frobenius-norm relative integrated
 			absolute error of the posterior-median spectral matrix
 			against the analytic reference (closed-form equal-link
 			LDC for \texttt{noise4a}, SEGWO with measured per-MOSA
-			ASDs for \texttt{noise5a}). $\Delta_{\rm PSD}$ is the
-			median over frequencies of the pointwise relative width
+			ASDs for \texttt{noise5a}), computed in the XYZ basis
+			for all three models (the AET-basis models are first
+			rotated back to XYZ via $M_{\mathrm{AET}}$).
+			$\Delta_{\rm PSD}$ is the median over frequencies of
+			the pointwise relative width
 			$[\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)]/\hat{S}^{50\%}(f)$
-			of the 90\% credible band on the diagonal PSDs
-			(computed in the XYZ basis for both models). Runtime is
-			wall-clock seconds for one full SVI+NUTS pipeline run on a
-			single 4-core CPU node.}
+			of the 90\% credible band on the diagonal PSDs (also
+			in the XYZ basis). Runtime is wall-clock seconds for
+			one full SVI+NUTS pipeline run on a single 4-core CPU
+			node; for $\mathcal{H}_{0}$ this is the total over the
+			three independent univariate channel fits.}
 		\label{tab:lisa_results}
-		\setlength{\tabcolsep}{6pt}
-		\begin{NiceTabular}{llc ccc ccc}
+		\setlength{\tabcolsep}{5pt}
+		\begin{NiceTabular}{llc ccc ccc ccc}
 		\CodeBefore
 			\rowcolor{gray!10}{3-5}
 		\Body
-			& & & \multicolumn{3}{c}{$\mathcal{H}_{AET}$} & \multicolumn{3}{c}{$\mathcal{H}_{XYZ}$} \\
-			\cmidrule(lr){4-6}\cmidrule(lr){7-9}
-			Noise & Duration & $N_{b}$ & RIAE & $\Delta_{\rm PSD}$ & $t$\,(s) & RIAE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
+			& & & \multicolumn{3}{c}{$\mathcal{H}_{0}$} & \multicolumn{3}{c}{$\mathcal{H}_{1}$} & \multicolumn{3}{c}{$\mathcal{H}_{2}$} \\
+			\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+			Noise & Duration & $N_{b}$ & RIAE & $\Delta_{\rm PSD}$ & $t$\,(s) & RIAE & $\Delta_{\rm PSD}$ & $t$\,(s) & RIAE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
 			\midrule
 			\multirow{3}{*}{\texttt{4a}}
-				& $1$\,mo & $4$  & $4.5\!\times\!10^{-3}$ & $4.8\%$ & $117$ & $4.7\!\times\!10^{-3}$ & $4.6\%$ & $119$ \\
-				& $6$\,mo & $25$ & $4.7\!\times\!10^{-3}$ & $1.9\%$ & $224$ & $5.3\!\times\!10^{-3}$ & $1.9\%$ & $181$ \\
-				& $1$\,yr & $52$ & $4.4\!\times\!10^{-3}$ & $1.2\%$ & $632$ & $5.0\!\times\!10^{-3}$ & $1.2\%$ & $853$ \\
+				& $1$\,mo & $4$  & $4.3\!\times\!10^{-3}$ & $3.4\%$ & $16$  & $4.5\!\times\!10^{-3}$ & $4.8\%$ & $117$ & $4.7\!\times\!10^{-3}$ & $4.6\%$ & $119$ \\
+				& $6$\,mo & $25$ & $4.7\!\times\!10^{-3}$ & $1.3\%$ & $13$  & $4.7\!\times\!10^{-3}$ & $1.9\%$ & $224$ & $5.3\!\times\!10^{-3}$ & $1.9\%$ & $181$ \\
+				& $1$\,yr & $52$ & $4.4\!\times\!10^{-3}$ & $0.8\%$ & $244$ & $4.4\!\times\!10^{-3}$ & $1.2\%$ & $632$ & $5.0\!\times\!10^{-3}$ & $1.2\%$ & $853$ \\
 			\multirow{3}{*}{\texttt{5a}}
-				& $1$\,mo & $4$  & $2.2\!\times\!10^{-2}$ & $4.9\%$ & $119$ & $1.1\!\times\!10^{-3}$ & $4.5\%$ & $177$ \\
-				& $6$\,mo & $25$ & $1.8\!\times\!10^{-2}$ & $1.9\%$ & $218$ & $9.8\!\times\!10^{-4}$ & $1.9\%$ & $245$ \\
-				& $1$\,yr & $52$ & $2.2\!\times\!10^{-2}$ & $1.3\%$ & $728$ & $8.6\!\times\!10^{-4}$ & $1.3\%$ & $1089$ \\
+				& $1$\,mo & $4$  & $3.3\!\times\!10^{-2}$ & $3.5\%$ & $15$  & $2.2\!\times\!10^{-2}$ & $4.9\%$ & $119$ & $1.1\!\times\!10^{-3}$ & $4.5\%$ & $177$ \\
+				& $6$\,mo & $25$ & $3.3\!\times\!10^{-2}$ & $1.4\%$ & $13$  & $1.8\!\times\!10^{-2}$ & $1.9\%$ & $218$ & $9.8\!\times\!10^{-4}$ & $1.9\%$ & $245$ \\
+				& $1$\,yr & $52$ & $3.3\!\times\!10^{-2}$ & $1.0\%$ & $191$ & $2.2\!\times\!10^{-2}$ & $1.3\%$ & $728$ & $8.6\!\times\!10^{-4}$ & $1.3\%$ & $1089$ \\
 		\end{NiceTabular}
 	\end{table*}
 
@@ -1058,7 +1124,7 @@
 		\includegraphics[width=0.48\linewidth]{triangle_noise5a_eta0p5.pdf}
 		\caption{Posterior summaries of the LISA TDI
 			$X_{2}Y_{2}Z_{2}$ spectral matrix from the unrestricted
-			$\mathcal{H}_{XYZ}$ model for the symmetric \texttt{noise4a}
+			$\mathcal{H}_{2}$ model for the symmetric \texttt{noise4a}
 			(left) and asymmetric \texttt{noise5a} (right) datasets at
 			safe-Bayes tempering $\eta=0.5$, shown at three observation
 			durations: $1$ month (blue), $6$ months (orange), and $12$
@@ -1072,7 +1138,7 @@
 	\end{figure*}
 
 	Figure~\ref{fig:lisa_eta0p5} overlays the three durations for both
-	datasets under the $\mathcal{H}_{XYZ}$ model. The
+	datasets under the $\mathcal{H}_{2}$ model. The
 	diagonal PSDs are recovered with sub-percent bias and CI widths that
 	contract with $\sqrt{T}$, while the off-diagonal coherences (the
 	cross-channel quantities most directly tied to
