@@ -137,28 +137,29 @@
 	\date{\today}
 
 	\begin{abstract}
-		We present a Bayesian multivariate P-spline method for estimating the
-		frequency-dependent cross-spectral density matrix of stationary vector time
-		series. We model the lower-triangular and diagonal components of the
-		frequency-varying Cholesky decomposition of the inverse spectral density
-		matrix, enforcing Hermitian positive definiteness at every frequency.
-		Model flexibility and smoothness for each Cholesky component is induced
-		by penalised B-spline priors.
-		Inference proceeds under a blocked, coarse-grained Whittle likelihood
-		with safe-Bayes $\eta$-tempering to stabilise posterior calibration, and
-		is performed with the No-U-Turn Sampler initialised from draws of a
-		stochastic variational approximation. Each likelihood evaluation
-		scales linearly with the number of frequencies and basis functions,
-		and quadratically with the number of channels. On synthetic VAR(2)
-		benchmarks with known ground truth, the method accurately recovers
-		diagonal and cross-spectral structure, attains near-nominal coverage, and
-		achieves low relative mean squared (Frobenius) error (RMSE) that improves with
-		sample size. We
-		illustrate the relevance to LISA by estimating the multichannel noise
-		spectral matrix for time-delay interferometry combinations, and
-		demonstrate that \AET-restricted models fail on realistic asymmetric
-		LISA noise by an order of magnitude in relative mean squared
-		(Frobenius) error.
+		We present a Bayesian P-spline method for estimating the
+    frequency-dependent cross-spectral density matrix of stationary
+    multivariate time series. The inverse spectral matrix is parametrised
+    through its frequency-varying Cholesky decomposition, which
+    guarantees Hermitian positive definiteness at every frequency. Each
+    real log-diagonal entry and each real and imaginary off-diagonal
+    entry is given an independent penalised B-spline prior that controls
+    smoothness. Inference uses a blocked, coarse-grained Whittle
+    likelihood with safe-Bayes $\eta$-tempering to stabilise posterior
+    calibration, sampled by the No-U-Turn Sampler from a variational
+    initialisation. On synthetic VAR(2) benchmarks with known ground
+    truth, the method recovers both diagonal and cross-spectral
+    structure, attains near-nominal credible-interval coverage, and
+    achieves a relative mean squared (Frobenius) error (RMSE) that
+    decreases with sample size. We then apply the method to publicly
+    released simulated LISA time-delay interferometry (TDI) data in two
+    noise configurations. In the idealised symmetric case, the full
+    multivariate model and a reduced model that assumes a diagonal
+    \AET\ noise covariance agree to within a few parts in $10^{3}$.
+    Under realistic asymmetric per-MOSA noise the \AET-diagonal
+    assumption fails by an order of magnitude in RMSE
+    ($\sim\!3.3\!\times\!10^{-2}$ versus $\sim\!10^{-3}$), whereas the
+    full multivariate model recovers the cross-spectral structure.
 	\end{abstract}
 
 	\keywords{gravitational waves, PSD estimation, CSD estimation, P-splines, LISA}
