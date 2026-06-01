@@ -36,6 +36,7 @@
 \usepackage{bm}% bold math
 \usepackage{hyperref}% add hypertext capabilities
 \usepackage{verbatim}
+\usepackage{xspace}            % smart spacing after the \AET/\XYZ macros
 \usepackage{multirow}          % \multirow in tabulars
 \usepackage{nicematrix}
 \usepackage{tikz}              % required for nicematrix \CodeBefore coloring
@@ -77,6 +78,11 @@
 \newcommand{\Z}{{\bf Z}}
 
 \newcommand{\Sn}{\ensuremath{S_n^{\mathrm{GP}}}}
+% TDI basis labels (single source of truth for the AET/XYZ trigraphs).
+% \textsc works in text and math; lowercase input renders as small caps.
+% \xspace restores a trailing space when needed (not before punctuation/hyphen).
+\newcommand{\AET}{\textsc{aet}\xspace}
+\newcommand{\XYZ}{\textsc{xyz}\xspace}
 \newcommand{\eqq}{\ensuremath{\!\mathrel{\scalebox{0.7}{=}}\!}}
 \newcommand{\tmes}{\ensuremath{{\mkern-2mu\times\mkern-2mu}}}
 \newcommand{\ex}[1]{\ensuremath{\tmes10^{\text{-}#1}}}
@@ -146,12 +152,12 @@
 		and quadratically with the number of channels. On synthetic VAR(2)
 		benchmarks with known ground truth, the method accurately recovers
 		diagonal and cross-spectral structure, attains near-nominal coverage, and
-		achieves low relative integrated squared (Frobenius) error (RISE) that improves with
+		achieves low relative mean squared (Frobenius) error (RMSE) that improves with
 		sample size. We
 		illustrate the relevance to LISA by estimating the multichannel noise
 		spectral matrix for time-delay interferometry combinations, and
-		demonstrate that AET-restricted models fail on realistic asymmetric
-		LISA noise by an order of magnitude in relative integrated squared
+		demonstrate that \AET-restricted models fail on realistic asymmetric
+		LISA noise by an order of magnitude in relative mean squared
 		(Frobenius) error.
 	\end{abstract}
 
@@ -232,7 +238,7 @@
     by construction, at the cost of assuming the simplified single-link noise
     structure.
      
-    In this paper, we model the PSD matrix of the XYZ TDI variables directly by extending the Bayesian P-spline PSD framework
+    In this paper, we model the PSD matrix of the \XYZ TDI variables directly by extending the Bayesian P-spline PSD framework
     \citep{maturana-russel_bayesian_2021} to the multivariate $p$-dimensional
     setting. We parametrise $\S(f)^{-1}$ through its Cholesky
     decomposition~\citep{RosenOri2007Aeom, Hu2023}, which factorises the
@@ -250,8 +256,8 @@
     We validate the method on a three-channel VAR(2) simulation with known
     ground truth, and on publicly released simulated LISA TDI datasets in a
     symmetric and a physically realistic asymmetric per-MOSA noise configuration. In the
-    asymmetric case an AET-restricted model fails by an order of magnitude in
-    relative integrated squared (Frobenius) error while the full multivariate model
+    asymmetric case an \AET-restricted model fails by an order of magnitude in
+    relative mean squared (Frobenius) error while the full multivariate model
     recovers the cross-spectral structure. A further benchmark against the
     bivariate estimators of \citet{yixuan_vnpc} on a VAR(2) problem with
     closed-form ground truth is reported in Appendix~\ref{app:var2_appendix}.
@@ -734,16 +740,15 @@
 	\label{subsec:sim_3d_var2}
 
 	We summarise spectral estimation accuracy with two complementary
-	metrics. The first is the relative integrated squared (Frobenius) error
-	(RISE),
+	metrics. The first is the relative mean squared (Frobenius) error
+	(RMSE),
 	\begin{equation}
-		\operatorname{RISE}= \frac{\int \! \left\lVert \widehat{S}(f) - S(f) \right\rVert_{F}^{2}
-		\, \mathrm{d}f}{\int \! \left\lVert S(f) \right\rVert_{F}^{2} \, \mathrm{d}f},
+		\operatorname{RMSE}= \frac{\int \! \left\lVert \widehat{S}(f) - S(f) \right\rVert_{F}^{2}
+		\, \mathrm{d}f}{\int \! \left\lVert S(f) \right\rVert_{F}^{2} \, \mathrm{d}f}, \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/diagnostics/_utils.py\#L56}
 	\end{equation}
 	where $\lVert \cdot \rVert_{F}$ denotes the Frobenius norm and the
-	integrals are evaluated numerically using Simpson's rule. RISE is an
-	$L^{2}$-energy ratio, monotone-equivalent to the standard relative
-	integrated absolute error (RIAE). This metric measures the bias of the
+	integrals are evaluated numerically using Simpson's rule over the
+	periodogram frequency grid. This metric measures the bias of the
 	posterior-median estimator $\widehat{S}(f)$ relative to the true
 	spectrum $S(f)$. The second metric is the
 	empirical coverage at level $\alpha$, defined as the fraction of
@@ -787,7 +792,7 @@
 	the NUTS and SVI posteriors overlaid. Both samplers recover the
 	diagonal PSDs and off-diagonal cross-spectra with substantially
 	smoother posterior medians than the raw periodogram, and the two
-	posterior medians track each other closely ($\mathrm{RISE}=0.114$
+	posterior medians track each other closely ($\mathrm{RMSE}=0.114$
 	for NUTS versus $0.102$ for SVI). The SVI credible bands, however,
 	are narrower than those of NUTS: for this realisation the
 	empirical 90\% coverage drops from $88\%$ under NUTS to $83\%$ under
@@ -801,7 +806,7 @@
 
 	Table~\ref{tab:3d_var2_results} reports a representative slice of the
 	$(N_{b},N_{h})$ grid. Coverage is near-nominal (89.8--90.8\%) across
-	every configuration, and the mean RISE varies by less than 3\% across
+	every configuration, and the mean RMSE varies by less than 3\% across
 	the grid. The number of retained frequency bins $N_{c}$ falls by a
 	factor of up to 32 between the finest ($N_{b}=1$, no coarse-graining) and
 	coarsest ($N_{b}=16$, $N_{h}=2$) configurations, with no measurable
@@ -828,7 +833,7 @@
 		degree-2 splines (mean $\pm$ std over ${\sim}500$ realisations),
 		all runs at $\eta=1$. Coverage is the fraction of (frequency,
 		matrix-element) pairs inside the pointwise 90\% credible interval.
-		RISE is the relative integrated squared (Frobenius) error. ESS
+		RMSE is the relative mean squared (Frobenius) error. ESS
 		is the median effective sample size across parameters. $N_{h}=$off
 		denotes no coarse-graining ($N_{h}=1$).}
 		\label{tab:3d_var2_results}
@@ -840,7 +845,7 @@
         \rowcolor{gray!10}{13-16}
         \rowcolor{gray!10}{20-21}
     \Body
-        $N_{b}$ & $N_{h}$ & $N_{c}$ & Coverage & RISE & ESS & Runtime (s) \\
+        $N_{b}$ & $N_{h}$ & $N_{c}$ & Coverage & RMSE & ESS & Runtime (s) \\
 		\midrule
 		1 & off & 8192 & $0.900 \pm 0.031$ & $0.111 \pm 0.004$ & $21,019 \pm 2726$ & $9.61 \pm 1.76$ \\
 		1 & 2 & 4096 & $0.898 \pm 0.031$ & $0.112 \pm 0.005$ & $24,057 \pm 2807$ & $9.21 \pm 1.69$ \\
@@ -870,8 +875,8 @@
 		\includegraphics[width=1\linewidth]{vi_vs_nuts_var3.pdf}
 		\caption{Representative $3\times3$ spectral density matrix estimate for a
 			single $n=16{,}384$ VAR(2) realisation, fit with $K=10$, $N_{b}=4$,
-			$N_{h}=4$ and $\eta=1$ (NUTS: $\mathrm{RISE}=0.114$, 90\% CI
-			coverage $88\%$; SVI: $\mathrm{RISE}=0.102$, 90\% CI coverage $83\%$).
+			$N_{h}=4$ and $\eta=1$ (NUTS: $\mathrm{RMSE}=0.114$, 90\% CI
+			coverage $88\%$; SVI: $\mathrm{RMSE}=0.102$, 90\% CI coverage $83\%$).
 			Each panel shows the coarse-grained periodogram statistic
 			$\Y_{h}^{*}/(T_{b}N_{b}N_{h})$ (grey), the theoretical spectrum
 			(dotted black), and posterior medians with 90\% credible bands for
@@ -892,7 +897,7 @@
 	time-delay interferometry (TDI) Michelson channels $X_{2}$, $Y_{2}$,
 	$Z_{2}$ from a publicly released LISA TDI dataset
 	\citep{lisa_noise4a, lisa_noise5a}. All channels are TDI 2.0 throughout,
-	and we suppress the generation subscript in what follows, writing XYZ for
+	and we suppress the generation subscript in what follows, writing \XYZ for
 	$(X_{2}, Y_{2}, Z_{2})$. The dataset was
 	produced with \texttt{lisainstrument}~\citep{lisainstrument} under the
 	LISA Data Challenge (LDC) Spritz noise model~\citep{ldcspritz} at a sampling rate of
@@ -902,22 +907,22 @@
 	\citep{staab_pytdi_2025} to produce the TDI 2.0 Michelson combinations used
 	here.
 
-	The noise-orthogonal $(A, E, T)$ TDI combinations are obtained from XYZ by
-	the orthonormal rotation $(A, E, T)^{\top} = M_{\mathrm{AET}}\,(X, Y, Z)^{\top}$
+	The noise-orthogonal $(A, E, T)$ TDI combinations are obtained from \XYZ by
+	the orthonormal rotation $(A, E, T)^{\top} = M_{\AET}\,(X, Y, Z)^{\top}$
 	with
 	\begin{equation}
 		\label{eq:M_AET}
-		M_{\mathrm{AET}} = \begin{pmatrix}
+		M_{\AET} = \begin{pmatrix}
 			1/\sqrt{2} & 0 & -1/\sqrt{2} \\
 			1/\sqrt{6} & -2/\sqrt{6} & 1/\sqrt{6} \\
 			1/\sqrt{3} & 1/\sqrt{3} & 1/\sqrt{3}
 		\end{pmatrix},
 	\end{equation}
-	which satisfies $M_{\mathrm{AET}}^{\top}M_{\mathrm{AET}} = I$ and has unit
+	which satisfies $M_{\AET}^{\top}M_{\AET} = I$ and has unit
 	determinant, so the rotation introduces no log-likelihood Jacobian
 	correction~\cite{prince2002_LISA_optimal_sensitivity}. Under the
-	idealised equal-arm, equal-noise assumption the AET basis diagonalises
-	the noise covariance, motivating the diagonal-AET restrictions tested
+	idealised equal-arm, equal-noise assumption the \AET basis diagonalises
+	the noise covariance, motivating the diagonal-\AET restrictions tested
 	below.
 
 	We analyse two noise configurations:
@@ -942,25 +947,34 @@
 		\texttt{SEGWO} package~\citep{bayle_segwo} by feeding the
 		twelve measured per-MOSA ASDs through analytic OMS/TM filter
 		shapes and projecting through PyTDI's TDI 2.0 Michelson
-		($X_{2},Y_{2},Z_{2}$) combinations to obtain the full
-		$3\times3$ XYZ covariance at every frequency.
+		\XYZ combinations to obtain the full
+		$3\times3$ \XYZ covariance at every frequency.
 	\end{itemize}
 	We fit each dataset under three competing hypotheses for the
 	$3\times3$ noise cross-spectrum, designed to test whether the
-	XYZ$\to$AET rotation diagonalises the LISA noise covariance to
-	within statistical resolution. Since $M_{\mathrm{AET}}$ is
-	orthogonal with unit determinant, fitting in the AET basis is
-	equivalent to fitting in the XYZ basis up to a deterministic
-	relabelling of $\S$. The three hypotheses therefore form a
+	\XYZ$\to$\AET rotation diagonalises the LISA noise covariance to
+	within statistical resolution. Since $M_{\AET}$ is
+	orthogonal with unit determinant, fitting in the \AET basis is
+	equivalent to fitting in the \XYZ basis up to a deterministic
+	relabelling of $\S$. Wherever the \AET basis is used
+	($\mathcal{H}_{0}$ and $\mathcal{H}_{1}$), the \XYZ$\to$\AET
+	rotation is applied to the time series first, and all subsequent
+	blocking, averaging, and coarse-graining is performed in the
+	fitting basis. The three hypotheses therefore form a
 	strictly nested hierarchy over the families of representable
 	spectral matrices,
-	$\mathcal{H}_{0}\subset\mathcal{H}_{1}\subset\mathcal{H}_{2}$:
+	$\mathcal{H}_{0}\subset\mathcal{H}_{1}\subset\mathcal{H}_{2}$.
+	The three models also differ in their data object:
+	$\mathcal{H}_{0}$ uses the three diagonal \AET periodograms,
+	whereas $\mathcal{H}_{1}$ and $\mathcal{H}_{2}$ use the full
+	$3\times3$ periodogram matrix (in the \AET and \XYZ bases
+	respectively):
 	\begin{itemize}
-		\item $\mathcal{H}_{0}$ (\emph{diagonal AET}).
+		\item $\mathcal{H}_{0}$ (\emph{diagonal \AET}).
 		The cross-spectral matrix is constrained to be \emph{exactly}
-		diagonal in the AET basis. The XYZ time series is first
-		rotated into AET via $M_{\mathrm{AET}}$ (Eq.~\ref{eq:M_AET}),
-		and each of the three AET channels is then fit independently
+		diagonal in the \AET basis. The \XYZ time series is first
+		rotated into \AET via $M_{\AET}$ (Eq.~\ref{eq:M_AET}),
+		and each of the three \AET channels is then fit independently
 		with a univariate ($p=1$) log-P-spline model on the diagonals
 		$\log\delta_{j}^{2}$ ($j=1,2,3$, corresponding to
 		$\log S_{AA}, \log S_{EE}, \log S_{TT}$) with $K=100$ knots
@@ -968,55 +982,68 @@
 		Eq.~\eqref{eq:delta_spline} is used. The off-diagonal
 		expansions Eqs.~\eqref{eq:theta_re_spline}
 		and~\eqref{eq:theta_im_spline} are not invoked.
-		Equivalently, this is the multivariate complex Wishart
-		likelihood on the $3\times3$ averaged periodogram matrix
-		$\Y_{h}^{*}$ with all off-diagonal Cholesky coefficients
-		$\theta_{jl}$ fixed to zero, since for a diagonal $\S$ the
-		Wishart likelihood factorises into the three univariate
-		diagonal terms. The diagonal AET posterior is assembled
+		The data for this model are the three \emph{univariate}
+		averaged periodograms --- the diagonal entries
+		$S_{AA}, S_{EE}, S_{TT}$ of $\Y_{h}^{*}$ --- so the
+		likelihood is a product of three independent Gamma
+		(univariate Whittle) likelihoods, one per \AET channel; the
+		off-diagonal periodogram entries never enter the fit. This is
+		precisely the special case of the complex Wishart likelihood
+		with a \emph{diagonal} scale matrix $\S$, which factorises
+		into the three diagonal Gamma terms. The diagonal \AET posterior is assembled
 		per-sample as $\mathrm{diag}(S_{AA},S_{EE},S_{TT})$ and
-		rotated back to the XYZ basis via
-		$\S_{\mathrm{XYZ}}=M_{\mathrm{AET}}^{\top}\S_{\mathrm{AET}}M_{\mathrm{AET}}$
-		for diagnostics. The XYZ off-diagonals carried by
+		rotated back to the \XYZ basis via
+		$\S_{\XYZ}=M_{\AET}^{\top}\S_{\AET}M_{\AET}$
+		for diagnostics. The \XYZ off-diagonals carried by
 		$\mathcal{H}_{0}$ therefore reflect only the deterministic
 		TDI rotation, with no fitted physical cross-power.
-		\item $\mathcal{H}_{1}$ (\emph{multivariate AET with
+		\item $\mathcal{H}_{1}$ (\emph{multivariate \AET with
 		restricted off-diagonals}). The cross-spectral matrix is
-		\emph{approximately} diagonal in the AET basis. The full
+		\emph{approximately} diagonal in the \AET basis. Unlike
+		$\mathcal{H}_{0}$, the data here are the full $3\times3$
+		averaged \AET periodogram matrix and the likelihood is the
+		complete multivariate complex Wishart --- the off-diagonal
+		entries do enter the fit. What is restricted is the
+		off-diagonal \emph{model}, not the data. The full
 		multivariate Cholesky model
 		(Eqs.~\ref{eq:delta_spline}--\ref{eq:theta_im_spline})
-		is fit to the AET-rotated time series with $K=100$ knots
+		is fit to the \AET-rotated time series with $K=100$ knots
 		on the diagonals $\log\delta_{j}^{2}$ but only $K_{\theta}=2$
-		knots on the off-diagonal components $\theta_{jl}$. The narrow off-diagonal
-		basis keeps $\S_{\mathrm{AET}}$ near diagonal while still
-		allowing the data to push back if smooth off-diagonal
-		structure is present. The posterior spectral matrix is
-		rotated back to the XYZ basis for diagnostics.
-		\item $\mathcal{H}_{2}$ (\emph{full multivariate XYZ}).
+		knots on each off-diagonal component $\theta_{jl}$, forcing
+		any fitted cross-power to be smooth and small.
+		$\mathcal{H}_{1}$ thus occupies the natural middle ground
+		between the strictly diagonal $\mathcal{H}_{0}$ (off-diagonal
+		data discarded, no cross-power) and the unrestricted
+		$\mathcal{H}_{2}$: it sees the off-diagonal data but is
+		biased toward a near-diagonal solution, so it can reveal
+		smooth cross-power when present without introducing
+		spurious structure when it is not. The posterior spectral matrix is
+		rotated back to the \XYZ basis for diagnostics.
+		\item $\mathcal{H}_{2}$ (\emph{full multivariate \XYZ}).
 		The cross-spectral matrix has fully populated off-diagonals.
 		The multivariate Cholesky model
 		(Eqs.~\ref{eq:delta_spline}--\ref{eq:theta_im_spline})
-		is fit directly to the XYZ time series with $K=100$ knots
+		is fit directly to the \XYZ time series with $K=100$ knots
 		for \emph{every} Cholesky component, both diagonal and
 		off-diagonal. No rotation is
-		needed since the fit is already in the XYZ basis. This is
+		needed since the fit is already in the \XYZ basis. This is
 		the unrestricted reference model.
 	\end{itemize}
-	For \texttt{noise4a} the AET basis diagonalises the noise
+	For \texttt{noise4a} the \AET basis diagonalises the noise
 	exactly, so the strong diagonal restriction imposed by
 	$\mathcal{H}_{0}$ (and the milder one of $\mathcal{H}_{1}$)
 	are both expected to be valid descriptions, and all three
 	models should agree to within statistical resolution. For
 	\texttt{noise5a} the per-MOSA asymmetry introduces genuine
-	off-diagonal power in the AET basis: $\mathcal{H}_{0}$ is
+	off-diagonal power in the \AET basis: $\mathcal{H}_{0}$ is
 	then mis-specified by construction (no off-diagonal flexibility
 	at all), $\mathcal{H}_{1}$ can absorb only the small-bandwidth
 	component of the off-diagonals through its $K_{\theta}=2$
 	knots, and $\mathcal{H}_{2}$ remains unrestricted. The expected
 	fit-quality ordering is therefore
-	$\mathrm{RISE}(\mathcal{H}_{0})\!>\!\mathrm{RISE}(\mathcal{H}_{1})\!>\!\mathrm{RISE}(\mathcal{H}_{2})$
+	$\mathrm{RMSE}(\mathcal{H}_{0})\!>\!\mathrm{RMSE}(\mathcal{H}_{1})\!>\!\mathrm{RMSE}(\mathcal{H}_{2})$
 	for \texttt{noise5a} and
-	$\mathrm{RISE}(\mathcal{H}_{0})\!\approx\!\mathrm{RISE}(\mathcal{H}_{1})\!\approx\!\mathrm{RISE}(\mathcal{H}_{2})$
+	$\mathrm{RMSE}(\mathcal{H}_{0})\!\approx\!\mathrm{RMSE}(\mathcal{H}_{1})\!\approx\!\mathrm{RMSE}(\mathcal{H}_{2})$
 	for \texttt{noise4a}.
 
 	For all three models, knots are placed by the adaptive quantile rule
@@ -1031,7 +1058,7 @@
 	excised with half-width $1$\,mHz prior to fitting. All other settings
 	follow Section~\ref{sec:bayesian-inference}.
 
-	In addition to the RISE introduced in Section~\ref{subsec:sim_3d_var2},
+	In addition to the RMSE introduced in Section~\ref{subsec:sim_3d_var2},
 	we report the median relative width of the 90\% credible band on the
 	diagonal PSDs,
 	\begin{equation}
@@ -1039,26 +1066,26 @@
 		\Delta_{\mathrm{PSD}} = \operatorname{median}_{f}
 		\frac{\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)}{\hat{S}^{50\%}(f)},
 	\end{equation}
-	computed in the XYZ basis for all three models. This complements the RISE
+	computed in the \XYZ basis for all three models. This complements the RMSE
 	(a bias metric) with a summary of posterior precision.
-	Table~\ref{tab:lisa_results} reports RISE, $\Delta_{\mathrm{PSD}}$, and
+	Table~\ref{tab:lisa_results} reports RMSE, $\Delta_{\mathrm{PSD}}$, and
 	wall-clock duration for the three models, two datasets, and three
 	observation durations. All eighteen LISA runs satisfy the convergence
 	diagnostics of
 	Section~\ref{sec:bayesian-inference}: $\hat R<1.01$ for all parameters,
 	bulk and tail ESS exceeding $400$, E-BFMI~$>0.3$, and no problematic
 	divergent transitions or tree-depth saturation. The results split sharply
-	along the AET-diagonalisation hypothesis.
+	along the \AET-diagonalisation hypothesis.
 
 	\emph{Symmetric noise (\texttt{noise4a}).} All three models recover
 	the analytic spectral matrix at the half-percent level
-	($\mathrm{RISE}\approx 4.4\!-\!5.3\times10^{-3}$) across all
+	($\mathrm{RMSE}\approx 4.4\!-\!5.3\times10^{-3}$) across all
 	durations and are statistically indistinguishable from one another.
-	This is the expected behaviour when the AET basis truly diagonalises
+	This is the expected behaviour when the \AET basis truly diagonalises
 	the noise: $\mathcal{H}_{0}$ already captures the cross-spectral
-	structure because the only off-diagonal power present in the XYZ
+	structure because the only off-diagonal power present in the \XYZ
 	basis is the deterministic geometric coupling recovered by the
-	$M_{\mathrm{AET}}^{\top}\!\cdot\!M_{\mathrm{AET}}$ rotation, and
+	$M_{\AET}^{\top}\!\cdot\!M_{\AET}$ rotation, and
 	the additional off-diagonal flexibility of $\mathcal{H}_{1}$ and
 	$\mathcal{H}_{2}$ has nothing to fit. Two conclusions follow:
 	(i) for equal-arm LISA noise the multivariate analysis is not
@@ -1066,26 +1093,26 @@
 	(ii) the unrestricted $\mathcal{H}_{2}$ model does not lose
 	accuracy on data that does not need its flexibility, confirming
 	that $\mathcal{H}_{2}$ remains a safe default when the
-	diagonal-AET assumption cannot be guaranteed in advance.
+	diagonal-\AET assumption cannot be guaranteed in advance.
 
 	\emph{Asymmetric noise (\texttt{noise5a}).} The three models
 	separate by orders of magnitude in the order predicted by their
 	off-diagonal flexibility,
-	$\mathrm{RISE}(\mathcal{H}_{0})\!>\!\mathrm{RISE}(\mathcal{H}_{1})\!>\!\mathrm{RISE}(\mathcal{H}_{2})$.
+	$\mathrm{RMSE}(\mathcal{H}_{0})\!>\!\mathrm{RMSE}(\mathcal{H}_{1})\!>\!\mathrm{RMSE}(\mathcal{H}_{2})$.
 	$\mathcal{H}_{0}$ stalls at
-	$\mathrm{RISE}\approx 3.3\!\times\!10^{-2}$ at all durations ---
-	a floor set by the AET off-diagonal power it is structurally
+	$\mathrm{RMSE}\approx 3.3\!\times\!10^{-2}$ at all durations ---
+	a floor set by the \AET off-diagonal power it is structurally
 	unable to represent. $\mathcal{H}_{1}$ improves on this by
 	roughly $50\%$
-	($\mathrm{RISE}\approx 1.8\!-\!2.2\!\times\!10^{-2}$) by
+	($\mathrm{RMSE}\approx 1.8\!-\!2.2\!\times\!10^{-2}$) by
 	allowing two off-diagonal knots, but is still limited
 	by its narrow $\theta_{jk}$ basis. $\mathcal{H}_{2}$ reaches
-	$\mathrm{RISE}\approx 9\!-\!11\!\times\!10^{-4}$, about
+	$\mathrm{RMSE}\approx 9\!-\!11\!\times\!10^{-4}$, about
 	$20\times$ smaller than $\mathcal{H}_{1}$ and $30\!-\!40\times$
 	smaller than $\mathcal{H}_{0}$, and continues to improve with
 	duration. This monotone nested ordering is the central diagnostic
 	of the LISA study: when the per-MOSA noise levels are asymmetric
-	(the physically realistic regime) the AET rotation does
+	(the physically realistic regime) the \AET rotation does
 	\emph{not} diagonalise the cross-spectral matrix, and a
 	multivariate model that estimates the full Cholesky factor is
 	required.
@@ -1106,34 +1133,34 @@
 	\texttt{noise5a} this tighter $\mathcal{H}_{0}$ posterior is a
 	misleading indicator of fit quality --- the bands do not include
 	the truth because the model is structurally unable to represent
-	the AET off-diagonals, as the order-of-magnitude RISE gap to
+	the \AET off-diagonals, as the order-of-magnitude RMSE gap to
 	$\mathcal{H}_{1}$ and $\mathcal{H}_{2}$ makes clear.
 
 	\begin{table*}[!htbp]
 		\centering
-		\caption{LISA TDI XYZ results at fixed safe-Bayes
+		\caption{LISA TDI \XYZ results at fixed safe-Bayes
 			tempering $\eta=0.5$ for the symmetric (\texttt{noise4a}) and
 			asymmetric (\texttt{noise5a}) datasets, fit with the
-			diagonal-AET null model ($\mathcal{H}_{0}$,
-			off-diagonal Cholesky coefficients fixed to zero), the AET-rotated multivariate
+			diagonal-\AET null model ($\mathcal{H}_{0}$,
+			off-diagonal Cholesky coefficients fixed to zero), the \AET-rotated multivariate
 			model with restricted off-diagonal basis ($\mathcal{H}_{1}$,
-			$K_{\theta}=2$), and the unrestricted multivariate XYZ
+			$K_{\theta}=2$), and the unrestricted multivariate \XYZ
 			model ($\mathcal{H}_{2}$), at three observation
 			durations. $N_{b}$ is the number of Wishart
 			time blocks (chosen to give blocks of approximately
 			seven days in length) and $N_{c}$ is set to
-			$1024$. RISE is the relative integrated squared (Frobenius)
+			$1024$. RMSE is the relative mean squared (Frobenius)
 			error of the posterior-median spectral matrix
 			against the analytic reference (closed-form equal-link
 			LDC for \texttt{noise4a}, SEGWO with measured per-MOSA
-			ASDs for \texttt{noise5a}), computed in the XYZ basis
-			for all three models (the AET-basis models are first
-			rotated back to XYZ via $M_{\mathrm{AET}}$).
+			ASDs for \texttt{noise5a}), computed in the \XYZ basis
+			for all three models (the \AET-basis models are first
+			rotated back to \XYZ via $M_{\AET}$).
 			$\Delta_{\rm PSD}$ is the median over frequencies of
 			the pointwise relative width
 			$[\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)]/\hat{S}^{50\%}(f)$
 			of the 90\% credible band on the diagonal PSDs (also
-			in the XYZ basis). Runtime is wall-clock seconds for
+			in the \XYZ basis). Runtime is wall-clock seconds for
 			one full SVI+NUTS pipeline run on a single 4-core CPU
 			node; for $\mathcal{H}_{0}$ this is the total over the
 			three independent univariate channel fits.}
@@ -1145,7 +1172,7 @@
 		\Body
 			& & & \multicolumn{3}{c}{$\mathcal{H}_{0}$} & \multicolumn{3}{c}{$\mathcal{H}_{1}$} & \multicolumn{3}{c}{$\mathcal{H}_{2}$} \\
 			\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
-			Noise & Duration & $N_{b}$ & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
+			Noise & Duration & $N_{b}$ & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
 			\midrule
 			\multirow{3}{*}{\texttt{4a}}
 				& $1$\,mo & $4$  & $4.3\!\times\!10^{-3}$ & $3.4\%$ & $16$  & $4.5\!\times\!10^{-3}$ & $4.8\%$ & $117$ & $4.7\!\times\!10^{-3}$ & $4.6\%$ & $119$ \\
@@ -1162,7 +1189,7 @@
 		\centering
 		\includegraphics[width=0.48\linewidth]{triangle_noise4a_eta0p5.pdf}\hfill
 		\includegraphics[width=0.48\linewidth]{triangle_noise5a_eta0p5.pdf}
-		\caption{Posterior summaries of the LISA TDI XYZ
+		\caption{Posterior summaries of the LISA TDI \XYZ
 			spectral matrix from the unrestricted
 			$\mathcal{H}_{2}$ model for the symmetric \texttt{noise4a}
 			(left) and asymmetric \texttt{noise5a} (right) datasets at
@@ -1409,7 +1436,7 @@
 			(1\,month, 6\,months, 1\,year).
 			Top: median pointwise relative width of the 90\% credible
 			band on the diagonal PSDs.
-			Bottom: matrix RISE (narrow $y$-range---RISE varies by
+			Bottom: matrix RMSE (narrow $y$-range---RMSE varies by
 			${\lesssim}5\%$ across the full sweep).
 			The vertical dotted line marks $\eta=0.5$, the value used in
 			Section~\ref{subsec:lisa}.}
@@ -1418,7 +1445,7 @@
 	\end{figure}
 
 	Two features emerge from Figure~\ref{fig:lisa_eta_sweep}.
-	First, the matrix RISE is essentially flat across the entire sweep:
+	First, the matrix RMSE is essentially flat across the entire sweep:
 	it varies by less than $\pm5\%$ about its mean at every duration,
 	confirming that the posterior-median point estimate is nearly
 	insensitive to $\eta$.

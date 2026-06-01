@@ -513,12 +513,12 @@ def _plot_vi_vs_nuts_overlay(
     # Match the LISA-plot style for visual consistency across the manuscript.
     plt.rcParams.update(
         {
-            "font.size": 11,
-            "axes.titlesize": 13,
-            "axes.labelsize": 12,
-            "legend.fontsize": 10,
-            "xtick.labelsize": 10,
-            "ytick.labelsize": 10,
+            "font.size": 14,
+            "axes.titlesize": 16,
+            "axes.labelsize": 15,
+            "legend.fontsize": 13,
+            "xtick.labelsize": 13,
+            "ytick.labelsize": 13,
         }
     )
 
@@ -675,7 +675,7 @@ def _plot_vi_vs_nuts_overlay(
                 transform=ax.transAxes,
                 ha="left",
                 va="top",
-                fontsize=15,
+                fontsize=18,
                 zorder=10,
             )
 
@@ -687,22 +687,20 @@ def _plot_vi_vs_nuts_overlay(
                     ax.set_ylabel(r"Cross-spectrum")
 
     handles, labels = axes[0, 0].get_legend_handles_labels()
+    fig.tight_layout(h_pad=0.55, w_pad=0.65, rect=(0.0, 0.0, 1.0, 0.96))
     if handles:
-        # Figure-level legend in the upper-right corner outside the axes.
         fig.legend(
             handles,
             labels,
-            loc="upper right",
-            bbox_to_anchor=(0.975, 0.975),
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.0),
             frameon=False,
-            ncol=1,
+            ncol=len(handles),
             handlelength=2.2,
             handletextpad=0.6,
-            columnspacing=0.9,
-            fontsize=10,
+            columnspacing=1.4,
+            fontsize=13,
         )
-
-    fig.tight_layout(h_pad=0.55, w_pad=0.65, rect=(0.0, 0.0, 1.0, 1.0))
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 

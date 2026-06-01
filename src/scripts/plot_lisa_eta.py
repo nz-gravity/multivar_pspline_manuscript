@@ -47,14 +47,15 @@ ETA_CHOSEN = 0.5
 fig, axes = plt.subplots(
     2,
     1,
-    figsize=(3.25, 4.15),
+    figsize=(3.25, 3.55),
     sharex=True,
-    constrained_layout=True,
+    constrained_layout=False,
+    gridspec_kw={"hspace": 0.0},
 )
 
 panels = [
-    ("ci_width_rel_psd_diag_median", "Median rel. CI width\n(diag. PSD)"),
-    ("riae", "Matrix RIAE"),
+    ("ci_width_rel_psd_diag_median", r"$\Delta_{\mathrm{PSD}}$"),
+    ("riae", "RMSE"),
 ]
 
 for ax, (col, ylabel) in zip(axes, panels):
@@ -68,7 +69,6 @@ for ax, (col, ylabel) in zip(axes, panels):
 
     ax.axvline(ETA_CHOSEN, color="0.55", linestyle=":", linewidth=0.8, zorder=0)
     ax.set_xscale("log")
-    # ax.set_xlabel(r"$\eta$")
     ax.set_ylabel(ylabel)
     ax.set_xticks([0.01, 0.1, 1.0])
     ax.xaxis.set_major_formatter(
@@ -76,6 +76,8 @@ for ax, (col, ylabel) in zip(axes, panels):
     )
     ax.grid(True, which="major", ls=":", alpha=0.35)
     ax.grid(True, which="minor", ls=":", alpha=0.18)
+
+axes[-1].set_xlabel(r"$\eta$")
 
 # RIAE: zoom in to make the ~5% flatness legible
 riae_all = df["riae"].values
@@ -88,5 +90,5 @@ axes[1].yaxis.set_major_formatter(mticker.FormatStrFormatter("%.4f"))
 axes[0].legend(loc="upper right", frameon=False, handlelength=2.0)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
-fig.savefig(OUT, dpi=300)
+fig.savefig(OUT, dpi=300, bbox_inches="tight")
 print(f"wrote {OUT}")
