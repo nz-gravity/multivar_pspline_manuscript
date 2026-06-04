@@ -330,14 +330,22 @@
 	$\Z$ into $N_{b}$ equal, non-overlapping blocks
 	$(\Z^{(1)},\ldots,\Z^{(N_{b})})$, each of duration $T_{b}=T/N_{b}$
 	and containing $n/N_{b}$ samples (illustrated in
-	Fig.~\ref{fig:blocked_likelihood})\footnote{Each block may be
-	tapered by a window function $w_{t}$ before the DFT to suppress
-	spectral leakage. In that case the block periodogram is rescaled by
-	the inverse effective noise bandwidth
-	$\mathrm{ENBW}=n_{b}\sum_{t}w_{t}^{2}/(\sum_{t}w_{t})^{2}$ (with
-	$n_{b}=n/N_{b}$), so that the complex-Wishart mean of $\Y(f_{k})$
-	remains $T_{b}\,\S(f_{k})$ and
-	Eqs.~\eqref{eq:blocked-trace}--\eqref{eq:log-like} apply unchanged.}.
+	Fig.~\ref{fig:blocked_likelihood}). Each block may be tapered by a
+	window function $w_{t}$ before the DFT to suppress spectral leakage.
+	Writing the number of samples per block as $n_{b}=n/N_{b}$, we define
+	the window's equivalent noise bandwidth as
+	\begin{equation}
+		\label{eq:enbw}
+		\mathrm{ENBW}
+		\;=\;
+		n_{b}\frac{\sum_{t=1}^{n_b}w_{t}^{2}}
+		{\left(\sum_{t=1}^{n_b}w_{t}\right)^{2}}\, .
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/datatypes/multivar.py\#L237}
+	\end{equation}
+	We rescale each block periodogram by
+	$1/\mathrm{ENBW}$, so that the complex-Wishart mean of $\Y(f_{k})$
+	remains $T_{b}\,\S(f_{k})$. The separate effect of tapering on the
+	effective likelihood information is described below.
 	Denoting the DFT of block $i$ by
 	$\d^{(i)}$, and assuming blocks are approximately independent under
 	stationarity, the blocked Whittle likelihood factorises as
@@ -420,6 +428,7 @@
 	complex Wishart under a common scale matrix,
 	\begin{equation}
 		\Y_{h}^{*}\;\dot\sim\;\mathcal{CW}_{p}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/preprocessing/coarse_grain.py\#L177}
 	\end{equation}
 	The approximation is only as good as the constant-$\S$ assumption, so bin
 	edges must avoid sharp spectral features (peaks, lines, transfer-function
@@ -454,12 +463,29 @@
 		\mathcal{L}_{b,c}(\d|\S) & \propto \prod_{h=1}^{N_{c}}
 		\left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}\times \nonumber \\
 		                         & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{*}\right]\right),
+		                         \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L197}
 	\end{align}
 	with eigendecomposition 
 	\begin{align}
 	\Y_{h}^{*}&=\sum_{\nu=1}^{p} \u^{(h)}_{\nu}\u^{(h)*}_{\nu}\, ,\\
 	\u^{(h)}_{\nu}&=\sqrt{\lambda^{(h)}_{\nu}}\,\v^{(h)}_{\nu}
 	\end{align}
+
+	Although rescaling the periodogram by $1/\mathrm{ENBW}$ preserves its mean,
+	tapering correlates neighbouring Fourier coefficients and therefore reduces
+	the effective number of independent frequency-domain observations. We
+	approximate this loss of information by dividing the log-likelihood by the
+	window's equivalent noise bandwidth in Eq.~\eqref{eq:enbw}, or equivalently
+	by using the power likelihood
+	\begin{equation}
+		\label{eq:enbw-likelihood}
+		\mathcal{L}_{b,c,w}(\d\mid\S)
+		\;\propto\; \mathcal{L}_{b,c}(\d\mid\S)^{1/\mathrm{ENBW}}\, .
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L241}
+	\end{equation}
+	Thus a rectangular window leaves the likelihood unchanged, whereas a
+	non-rectangular taper reduces its curvature by the factor
+	$1/\mathrm{ENBW}$.
 
 	\subsection{Parametrisation using the Cholesky Decomposition}
 	Following~\citet{RosenOri2007Aeom,Hu2023}, we parametrise the
@@ -496,7 +522,7 @@
 		\mathcal{L}_{j}(\btheta_{j},\bdelta_{j}) \propto
 		\prod_{h=1}^{N_{c}} \delta_{jh}^{-2N_{b}N_{h}}
 		\exp\!\left(\frac{-\sum_{\nu=1}^{p}\left|u_{j\nu}^{(h)}-\sum_{l=1}^{j-1}\theta_{jl}^{(h)}\,u_{l\nu}^{(h)}\right|^{2}}
-		              {T_{b}\,\delta_{jh}^{2}}\right), \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/main/src/log_psplines/pipeline/models.py\#L81}
+		              {T_{b}\,\delta_{jh}^{2}}\right), \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L81}
 	\end{equation}
 	\end{widetext}%
 	with regression coefficients $\theta_{jl}^{(h)}$ (the off-diagonal
@@ -559,12 +585,15 @@
 	\citet{grunwald2019}: raise the likelihood to a power $\eta\in(0,1]$,
 	\begin{equation}
 		\label{eq:eta-tempered}
-		\mathcal{L}_{\eta}(\d\mid\S) \;\propto\; \mathcal{L}_{b,c}(\d\mid\S)^{\eta},
+		\mathcal{L}_{\eta}(\d\mid\S)
+		\;\propto\; \mathcal{L}_{b,c,w}(\d\mid\S)^{\eta}
+		\;\propto\; \mathcal{L}_{b,c}(\d\mid\S)^{\eta/\mathrm{ENBW}},
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L244}
 	\end{equation}
-	which is equivalent to scaling the Wishart shape parameter
-	$N_{b}N_{h}\mapsto \eta\,N_{b}N_{h}$ in
+	which, together with the ENBW correction, gives an effective scaling
+	$N_{b}N_{h}\mapsto \eta N_{b}N_{h}/\mathrm{ENBW}$ in
 	Eq.~\eqref{eq:log-like-coarse}. The limit $\eta\to 1$ recovers the
-	original likelihood, while $\eta\to 0$ recovers the prior. Intermediate
+	window-corrected likelihood, while $\eta\to 0$ recovers the prior. Intermediate
 	$\eta$ down-weights the (asymptotic) likelihood relative to the prior in
 	exactly the right amount to restore nominal coverage when the
 	approximation is imperfect.
@@ -575,13 +604,14 @@
 	fine periodograms summed in each bin: schematically,
 	\begin{equation}
 		\label{eq:fisher-scaling}
-		-\,\partial^{2}_{\theta\theta}\,\log\mathcal{L}_{b,c}(\d\mid\S(\theta))
-		\;\propto\; N_{b}N_{h}\,\mathcal{I}_{0}(\theta),
+		-\,\partial^{2}_{\theta\theta}\,\log\mathcal{L}_{b,c,w}(\d\mid\S(\theta))
+		\;\propto\; \frac{N_{b}N_{h}}{\mathrm{ENBW}}\,\mathcal{I}_{0}(\theta),
 	\end{equation}
 	where $\mathcal{I}_{0}$ is the per-bin information matrix induced by
-	a single complex Wishart observation. Increasing either blocking or
-	coarse-graining therefore sharpens the log-posterior by the same
-	factor $N_{b}N_{h}$. We treat $\eta$ as a tunable calibration
+	a single complex Wishart observation. For a fixed window, increasing either
+	blocking or coarse-graining therefore sharpens the log-posterior by the
+	same factor $N_{b}N_{h}$, while tapering offsets this by
+	$1/\mathrm{ENBW}$. We treat $\eta$ as a tunable calibration
 	knob rather than a fundamental quantity. For the small synthetic
 	benchmarks in Section~\ref{subsec:sim_3d_var2}
 	($n=16{,}384$, $N_{b}N_{h}\!\lesssim\!10^{2}$) the un-tempered limit
@@ -602,7 +632,7 @@
 	\begin{align}
 		\log \delta_{jk}^{2}    & = \sum_{m=1}^{K_j}B_{m}(f_{k}) w_{j,m}^{(\delta)}\label{eq:delta_spline}     \\
 		\Re[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Re)}\label{eq:theta_re_spline} \\
-		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline} \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/b8e58fd8aaef0c0179499cf7b6a3c2482667626b/src/log_psplines/psplines/psplines.py\#L545}
+		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline} \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/psplines/psplines.py\#L545}
 	\end{align}
 	where $B_{m}(f_{k})$ are B-spline basis functions evaluated at frequency
 	$f_{k}$, $K_{j}$ and $K_{jl}$ are the numbers of basis functions for the
@@ -625,6 +655,7 @@
 	\begin{equation}
 		\label{eq:Pj}
 		[\bold{P}_{j}]_{lm}= \int_{0}^{1} B_{l}''(t)\, B_{m}''(t)\, \mathrm{d}t.
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/psplines/initialisation.py\#L150}
 	\end{equation}
 	Unlike the finite-difference approximation
 	$\bold{D}_{2}^{\top}\bold{D}_{2}$ used in the original P-spline
