@@ -129,7 +129,7 @@
 
 % Stage 4 stage label below the coarse cells
 \node[stagelabel] at ($(cg1)!0.5!(cg4) + (0, -7mm)$)
-    {Coarse-grained periodogram $\mathbf{Y}_{h}^{*}$};
+    {Coarse-grained periodogram $\mathbf{Y}_{h}^{\mathrm{cg}}$};
 \node[lengthlabel] at ($(cg1)!0.5!(cg4) + (0, -12mm)$)
     {$N_{c}=n/(2N_{b}N_{h})$ bins};
 
@@ -137,6 +137,6 @@
 \node[formulalabel, anchor=west, align=left]
     at ($(avg8.east) + (5mm, -8mm)$)
     {sum every $N_{h}$ frequencies\\[1pt]
-     $\mathbf{Y}_{h}^{*}=\!\!\displaystyle\sum_{f_{k}\in J_{h}}\!\!\mathbf{Y}(f_{k})$};
+     $\mathbf{Y}_{h}^{\mathrm{cg}}=\!\!\displaystyle\sum_{f_{k}\in J_{h}}\!\!\mathbf{Y}(f_{k})$};
 
 \end{tikzpicture}

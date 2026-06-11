@@ -43,26 +43,26 @@
     \groupshaded{Spectral density}{%
         \defitem{$\Z$}{Observed $p$-channel time series, $\Z\in\mathbb{R}^{n\times p}$.}
         \defitem{$\d(f_k)$}{DFT vector, $\d(f_k)\in\mathbb{C}^p$.}
-        \defitem{$\Gamma(h),\ \gamma_{lm}(h)$}{Autocovariance matrix at lag $h$ and its $(l,m)$ entry.}
+        \defitem{$\Gamma(\tau),\ \gamma_{lm}(\tau)$}{Autocovariance matrix at integer lag $\tau$ and its $(l,m)$ entry.}
         \defitem{$\S(f_k)$}{$p\times p$ Hermitian positive-definite spectral density matrix; Fourier transform of $\Gamma$.}
     }
 
     \groupplain{Periodogram \& Wishart statistics}{%
         \defitem{$\I^{(i)}(f_k),\ \bar\I(f_k)$}{Block-$i$ periodogram, $\I^{(i)}=\d^{(i)}\d^{(i)*}\sim\mathcal{CW}_p(T_b\S,1)$; block-averaged periodogram $\bar\I=N_b^{-1}\sum_i\I^{(i)}$.}
         \defitem{$\Y(f_k)$}{Summed periodogram / Wishart statistic, $\Y=N_b\bar\I\sim\mathcal{CW}_p(T_b\S,N_b)$.}
-        \defitem{$\Y_h^{*}$}{Coarse-grained statistic, $\Y_h^*=\sum_{f_k\in J_h}\Y(f_k)\,\dot\sim\,\mathcal{CW}_p(T_b\S(\bar f_h),N_bN_h)$.}
+        \defitem{$\Y_h^{\mathrm{cg}}$}{Coarse-grained statistic, $\Y_h^{\mathrm{cg}}=\sum_{f_k\in J_h}\Y(f_k)\,\dot\sim\,\mathcal{CW}_p(T_b\S(\bar f_h),N_bN_h)$.}
         \defitem{$\lambda_\nu^{(k)},\ \v_\nu^{(k)},\ \u_\nu^{(k)}$}{$\nu$th eigenvalue/unit eigenvector of $\Y(f_k)$; scaled eigenvector $\u_\nu^{(k)}=\sqrt{\lambda_\nu^{(k)}}\,\v_\nu^{(k)}$.}
     }
 
     \groupshaded{Cholesky parametrisation}{%
         \defitem{$\mathbf{T}_k,\ \mathbf{D}_k$}{Factors in $\S(f_k)^{-1}=\mathbf{T}_k^*\mathbf{D}_k^{-1}\mathbf{T}_k$: $\mathbf{T}_k$ unit lower-triangular, $\mathbf{D}_k$ diagonal with entries $\delta_{1k}^2,\ldots,\delta_{pk}^2$.}
         \defitem{$\theta_{jl}^{(k)},\ \delta_{jk}^2$}{Off-diagonal entry $(j,l)$ of $\mathbf{T}_k$ ($j>l$) and $j$th diagonal entry of $\mathbf{D}_k$.}
-        \defitem{$\btheta_j,\ \bdelta_j$}{Parameter vectors for channel $j$: collect $\theta_{jl}^{(k)}$ ($l<j$) and $\delta_{jk}$ across $k=1,\ldots,n/(2N_b)$.}
+        \defitem{$\btheta_j,\ \bdelta_j$}{Parameter vectors for channel $j$: collect $\theta_{jl}^{(h)}$ ($l<j$) and $\delta_{jh}$ across the coarse bins $h=1,\ldots,N_c$.}
     }
 
     \groupplain{P-spline model}{%
         \defitem{$K,\ B_m(f_k)$}{Number of B-spline basis functions (model hyperparameter, distinct from frequency index $k$); $m$th basis evaluated at $f_k$.}
-        \defitem{$M_j,\ M_{jl}$}{Basis sizes for the $j$th diagonal and $(j,l)$ off-diagonal components.}
+        \defitem{$K_j,\ K_{jl}$}{Basis sizes for the $j$th diagonal and $(j,l)$ off-diagonal components.}
         \defitem{$\mathbf{w}_j^{(\delta)},\ \mathbf{w}_{jl}^{(\Re)},\ \mathbf{w}_{jl}^{(\Im)}$}{Spline coefficient vectors for $\log\delta_{jk}^2$, $\Re[\theta_{jl}]$, $\Im[\theta_{jl}]$.}
         \defitem{$\mathbf{P}_j,\ \phi_j$}{Penalty matrix $[\mathbf{P}_j]_{lm}=\int_0^1 B_l''B_m''\,\mathrm{d}t$ and smoothing precision hyperparameter.}
     }
