@@ -43,24 +43,10 @@
 \usepackage{booktabs}
 \usepackage{siunitx}
 \usepackage{float}             % provides [H] strict placement specifier
-\usepackage[commandnameprefix=ifneeded]{changes}
-\definechangesauthor[name={Avi}, color=blue]{AV}
 
 \newcommand{\codelink}[1]{%
 	\quad\text{\href{#1}{\scalebox{0.65}{\GitHubIcon}}}%
 }
-
-
-\newcommand{\avi}[1]{\textcolor{orange}{[Avi: #1]}}
-\newcommand{\RM}[1]{\textcolor{red}{[RM: #1]}}
-\newcommand{\kl}[1]{\textcolor{violet}{Kate : #1}}
-\newcommand{\KJ}[1]{\textcolor{teal}{KJ : #1}}
-\newcommand{\NC}[1]{\textcolor{green}{NC : #1}}
-\newcommand{\pmr}[1]{\textcolor{blue}{[Patricio: #1]}}
-\newcommand{\jliu}[1]{\textcolor{blue}{[Jianan: #1]}}
-
-% Optional argument hint: \citeme or \citeme[hint]
-\newcommand{\citeme}[1][]{\textcolor{red}{\textbf{[CITEME\ifx\\#1\\\else: #1\fi]}}}
 
 
 \newcommand{\vect}[1]{\boldsymbol{#1}}
@@ -150,14 +136,15 @@
     initialisation. On synthetic VAR(2) benchmarks with known ground
     truth, the method recovers both diagonal and cross-spectral
     structure, attains near-nominal credible-interval coverage, and
-    achieves a relative mean squared (Frobenius) error (RMSE) that
+    achieves a relative integrated squared (Frobenius) error (RISE) that
     decreases with sample size. We then apply the method to publicly
     released simulated LISA time-delay interferometry (TDI) data in two
     noise configurations. In the idealised symmetric case, the full
     multivariate model and a reduced model that assumes a diagonal
-    \AET\ noise covariance agree to within $\sim10^{-3}$.
-    Under realistic asymmetric per-MOSA noise the \AET-diagonal
-    assumption fails by an order of magnitude in RMSE
+    \AET\ noise covariance agree to within $\sim10^{-3}$ in RISE.
+    Under realistic noise that is asymmetric across the six Movable
+    Optical Sub-Assemblies (MOSAs), the \AET-diagonal
+    assumption fails by more than an order of magnitude in RISE
     ($\sim\!3.3\!\times\!10^{-2}$ versus $\sim\!10^{-3}$), whereas the
     full multivariate model recovers the cross-spectral structure.
 	\end{abstract}
@@ -179,7 +166,7 @@
     A single-channel noise model cannot capture the cross-spectral correlations
     that matter for joint inference.
      
-    Nonparametric/flexible Bayesian approaches to PSD estimation have a well-developed
+    Flexible nonparametric Bayesian approaches to PSD estimation have a well-developed
     statistical foundation, characterised by an expansion of the PSD in terms of a
     potentially large or infinite number of basis functions combined with noninformative priors on the
     coefficients. Examples include
@@ -211,8 +198,9 @@
     These univariate approaches model each channel independently. This is
     justified in the idealised equal-arm stationary LISA configuration, which
     has vanishing off-diagonal cross-spectra between the three TDI channels,
-    but realistic noise (unequal arm lengths, per-MOSA (Movable Optical Sub-Assembly) imbalance, and
-    instrumental breathing~\citep{muratore2021instrumental}) generates
+    but realistic noise --- with unequal arm lengths, noise-level imbalance
+    across the six Movable Optical Sub-Assemblies (MOSAs), and
+    instrumental breathing~\citep{muratore2021instrumental} --- generates
     non-trivial off-diagonal entries in the $3\times 3$ spectral density
     matrix $\S(f)$, whose normalised magnitudes (the channel-pair
     coherences) quantify the cross-channel correlation that
@@ -247,7 +235,7 @@
     sampled in parallel and guarantees the Hermitian positive definiteness
     condition.
     Each block's log-diagonal spectra and real and imaginary parts of the complex
-    off-diagonal cross-spectra are modeled with penalised B-splines under a
+    off-diagonal cross-spectra are modelled with penalised B-splines under a
     hierarchical smoothing prior.
     This prior is updated by a blocked, coarse-grained Whittle likelihood
     with safe-Bayes $\eta$-tempering~\citep{grunwald2019} to stabilise
@@ -257,8 +245,8 @@
     We validate the method on a three-channel VAR(2) simulation with known
     ground truth, and on publicly released simulated LISA TDI datasets in a
     symmetric and a physically realistic asymmetric per-MOSA noise configuration. In the
-    asymmetric case an \AET-restricted model fails by an order of magnitude in
-    relative mean squared (Frobenius) error while the full multivariate model
+    asymmetric case an \AET-restricted model fails by more than an order of magnitude in
+    relative integrated squared (Frobenius) error while the full multivariate model
     recovers the cross-spectral structure. A further benchmark against the
     bivariate estimators of \citet{yixuan_vnpc} on a VAR(2) problem with
     closed-form ground truth is reported in Appendix~\ref{app:var2_appendix}.
@@ -279,8 +267,8 @@
 	this section. Let
 	$\Z=(\Z_{1},\ldots,\Z_{n})^{\intercal}\in \mathbb{R}^{n\times p}$ be a
 	$p$-dimensional stationary, mean-zero time series sampled at intervals
-	$\Delta_{t}=1/(2f_{Ny})$, so that $\Z_{\nu}=\Z(\nu\Delta_{t})$ for
-	$\nu=1,\ldots,n$, where $f_{Ny}$ is the Nyquist frequency. The total
+	$\Delta_{t}=1/(2f_{Ny})$, so that $\Z_{t}=\Z(t\Delta_{t})$ for
+	$t=1,\ldots,n$, where $f_{Ny}$ is the Nyquist frequency. The total
 	observation time is $T=n\Delta_{t}$ and the frequency resolution is
 	\begin{align}
 		\Delta_{f} = \frac{1}{n \Delta_{t}}= \frac{1}{T}\, .
@@ -292,24 +280,29 @@
 	with $f_{k}=k/T$ for $k=1,\ldots,N$, where $N=\lfloor n/2\rfloor$.
 
 	For stationary series with absolutely summable matrix autocovariances
-	$\sum_{h=-\infty}^{\infty}\lVert\Gamma(h)\rVert<\infty$, the Fourier coefficients
+	$\sum_{\tau=-\infty}^{\infty}\lVert\Gamma(\tau)\rVert<\infty$, the Fourier coefficients
 	$\d(f_{k})$ are asymptotically independent, complex Gaussian with mean zero
 	and covariance $T\,\S(f_{k})$, where
 	\[
-		\S(f)=\frac{1}{2f_{Ny}}\sum_{\nu=-\infty}^{\infty}\Gamma(\nu \Delta_{t}) \exp
-		\left(-2\pi i f \nu\Delta_{t} \right)
+		\S(f)=\frac{1}{2f_{Ny}}\sum_{\tau=-\infty}^{\infty}\Gamma(\tau) \exp
+		\left(-2\pi i f \tau\Delta_{t} \right)
 	\]
 	is the two-sided spectral density matrix --- the Fourier transform of the
-	autocovariance $\Gamma(h)=\mathbb{E}(\Z_{t}\Z_{t+h}^{\intercal})$. This
+	autocovariance $\Gamma(\tau)=\mathbb{E}(\Z_{t}\Z_{t+\tau}^{\intercal})$ at
+	integer lag $\tau$. While the likelihood below is expressed in terms of
+	the two-sided density, all spectra reported in this paper (estimates,
+	analytic references, and figures) follow the one-sided convention,
+	obtained by doubling the two-sided density at positive frequencies. This
 	asymptotic Gaussian approximation is the basis of the multivariate
 	Whittle likelihood~\citep{grainger2023multivariate}
 	\begin{align}
 		\label{eq:Whittle likelihood}
-		\mathcal{L}(\d|\S) & \propto \prod_{k=1}^{N}\det(\S(f_{k}))^{-1}\times \nonumber         \\
+		\mathcal{L}(\d|\S) & \propto \prod_{k=1}^{N}\left|\S(f_{k})\right|^{-1}\times \nonumber         \\
 		                                                & \exp\left(-\frac{1}{T}\d(f_{k})^{*} \S(f_{k})^{-1}\d(f_{k})\right),
 	\end{align}
-	where $\d(f_{k})^{*}$ denotes the conjugate transpose of $\d(f_{k})$ and
-	$\S(f_{k})$ is a Hermitian positive semidefinite matrix.
+	where $\d(f_{k})^{*}$ denotes the conjugate transpose of $\d(f_{k})$,
+	$\left|\cdot\right|$ denotes the matrix determinant, and
+	$\S(f_{k})$ is a Hermitian positive definite matrix.
 
 	The diagonal entries $S_{ii}(f)$ are the power spectral densities (PSDs) of channel $i$,
 	while the off-diagonals $S_{ij}(f)$ for $i\neq j$ are the (complex)
@@ -376,7 +369,7 @@
 	complex Wishart distribution\footnote{We write
 	$\A\sim\mathcal{CW}_{d}(\M,m)$ if the $d\times d$ Hermitian positive
 	definite matrix $\A$ has density proportional to
-	$\det(\M)^{-m}\exp(-\tr[\M^{-1}\A])$, with mean $m\M$.}
+	$\left|\M\right|^{-m}\exp(-\tr[\M^{-1}\A])$, with mean $m\M$.}
 	from summing $N_{b}$ assumed-independent single-block periodogram
 	contributions:
 	\begin{align}
@@ -420,14 +413,14 @@
 	$\bar{f}_{h}\equiv \tfrac{1}{N_{h}}\sum_{f\in J_{h}} f$, which need
 	not coincide with a Fourier frequency.
 	Replace the per-frequency matrix $\Y(f_{k})$ by the within-bin sum
-	$\Y_{h}^{*}=\sum_{f\in J_{h}}\Y(f)$. 
+	$\Y_{h}^{\mathrm{cg}}=\sum_{f\in J_{h}}\Y(f)$. 
 
 	Under the assumption that $\S(f)\approx\S(\bar{f}_{h})$ across each $J_{h}$,
 	the $\Y(f)$ within the bin are approximately i.i.d.\
 	$\mathcal{CW}_{p}(T_b\S(\bar{f}_{h}), N_{b})$, and by the additivity of the
 	complex Wishart under a common scale matrix,
 	\begin{equation}
-		\Y_{h}^{*}\;\dot\sim\;\mathcal{CW}_{p}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
+		\Y_{h}^{\mathrm{cg}}\;\dot\sim\;\mathcal{CW}_{p}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
 		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/preprocessing/coarse_grain.py\#L177}
 	\end{equation}
 	The approximation is only as good as the constant-$\S$ assumption, so bin
@@ -438,7 +431,7 @@
 		\centering
 		\includegraphics[width=\linewidth]{blocked_likelihood.pdf}
 		\caption{Construction of the blocked, coarse-grained periodogram.
-			The $n$-sample timeseries is partitioned into $N_{b}$
+			The $n$-sample time series is partitioned into $N_{b}$
 			non-overlapping blocks $\{b_{i}\}$ of length $T/N_{b}$. Each
 			block is Fourier-transformed independently, yielding $N_{b}$
 			single-block periodograms $\mathbf{I}^{(i)}$ each of length
@@ -449,7 +442,7 @@
 			$\bar{\mathbf{I}}=\mathbf{Y}/N_{b}$), which is then summed
 			over consecutive groups of $N_{h}$ adjacent fine frequencies
 			to produce the final coarse-grained periodogram
-			$\mathbf{Y}_{h}^{*}$ of length $n/(2N_{b}N_{h})$.}
+			$\mathbf{Y}_{h}^{\mathrm{cg}}$ of length $n/(2N_{b}N_{h})$.}
 		\label{fig:blocked_likelihood}
 	\end{figure*}
 
@@ -462,13 +455,13 @@
 		\label{eq:log-like-coarse}
 		\mathcal{L}_{b,c}(\d|\S) & \propto \prod_{h=1}^{N_{c}}
 		\left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}\times \nonumber \\
-		                         & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{*}\right]\right),
+		                         & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{\mathrm{cg}}\right]\right),
 		                         \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L197}
 	\end{align}
-	with eigendecomposition 
+	with eigendecomposition
 	\begin{align}
-	\Y_{h}^{*}&=\sum_{\nu=1}^{p} \u^{(h)}_{\nu}\u^{(h)*}_{\nu}\, ,\\
-	\u^{(h)}_{\nu}&=\sqrt{\lambda^{(h)}_{\nu}}\,\v^{(h)}_{\nu}
+	\Y_{h}^{\mathrm{cg}}&=\sum_{\nu=1}^{p} \u^{(h)}_{\nu}\u^{(h)*}_{\nu}\, ,\\
+	\u^{(h)}_{\nu}&=\sqrt{\lambda^{(h)}_{\nu}}\,\v^{(h)}_{\nu}\, .
 	\end{align}
 
 	Although rescaling the periodogram by $1/\mathrm{ENBW}$ preserves its mean,
@@ -529,7 +522,7 @@
 	Cholesky entries at coarse bin $h$) and noise variance
 	$\delta_{jh}^{2}$ (the $j$th diagonal entry of $\mathbf{D}_{h}$).
 	The eigenvectors $\u_{\nu}^{(h)}$ are those of the coarse-grained
-	statistic $\Y_{h}^{*}$, evaluated at the bin midpoint $\bar f_{h}$.
+	statistic $\Y_{h}^{\mathrm{cg}}$, evaluated at the bin midpoint $\bar f_{h}$.
 	The parameter blocks $\btheta_{j}$ and $\bdelta_{j}$ collect all
 	$\theta_{jl}^{(h)}$ ($l<j$) and $\delta_{jh}$ across the coarse bins
 	$h=1,\ldots,N_{c}$.
@@ -638,7 +631,10 @@
 	$f_{k}$, $K_{j}$ and $K_{jl}$ are the numbers of basis functions for the
 	$j$-th diagonal and $(j,l)$ off-diagonal components, respectively, and
 	$w_{j,m}^{(\delta)}$, $w_{jl,m}^{(\Re)}$, $w_{jl,m}^{(\Im)}$ are the
-	corresponding spline coefficients.
+	corresponding spline coefficients. When the blocked, coarse-grained
+	likelihood is used, these expansions are evaluated at the coarse-bin
+	centres $\bar{f}_{h}$, yielding the parameters $\delta_{jh}^{2}$ and
+	$\theta_{jl}^{(h)}$ that enter Eq.~\eqref{eq:likelihoodj}.
 
 	Knots are placed adaptively following
 	\citet{maturana-russel_bayesian_2021}: for each Cholesky component the
@@ -692,8 +688,7 @@
 		\nu_{j}              & \sim \text{Gamma}(\alpha_{\nu}, \beta_{\nu})
 	\end{align}
 	where $\bold{w}_{j}$ is the vector of spline coefficients and
-	$\phi_{j}$, $\nu_{j}$ are precision hyperparameters.
-	\footnote{In the
+	$\phi_{j}$, $\nu_{j}$ are precision hyperparameters.\footnote{In the
 	closely related univariate constructions of
 	\citet{maturana-russel_bayesian_2021} and \citet{aimen2026lisa}
 	this hyperparameter is denoted $\delta_{j}$. 
@@ -759,10 +754,10 @@
 
 	\paragraph{Convergence diagnostics.}
 	We assess convergence by checking that the chains satisfy
-	$\hat{R}<1.01$ (the Rank-normalized Gelman--Rubin potential scale reduction factor~\cite{gelman1992inference, arviz_2019}, that the bulk and tail effective sample sizes both
+	$\hat{R}<1.01$ (the rank-normalised Gelman--Rubin potential scale reduction factor~\cite{gelman1992inference, arviz_2019}), that the bulk and tail effective sample sizes both
 	exceed $400$, that the energy-Bayesian fraction of missing
-	information satisfies E-BFMI~$>0.3$, and that no chain shows
-	divergent transitions or maximum tree-depth saturation. All results
+	information satisfies E-BFMI~$>0.3$, and that divergent transitions
+	and maximum tree-depth saturation are absent or negligible. All results
 	in Section~\ref{sec:application} satisfy these criteria unless
 	explicitly noted otherwise.
 
@@ -772,10 +767,10 @@
 	\label{subsec:sim_3d_var2}
 
 	We summarise spectral estimation accuracy with two complementary
-	metrics. The first is the relative mean squared (Frobenius) error
-	(RMSE),
+	metrics. The first is the relative integrated squared (Frobenius)
+	error (RISE),
 	\begin{equation}
-		\operatorname{RMSE}= \frac{\int \! \left\lVert \widehat{S}(f) - S(f) \right\rVert_{F}^{2}
+		\operatorname{RISE}= \frac{\int \! \left\lVert \widehat{S}(f) - S(f) \right\rVert_{F}^{2}
 		\, \mathrm{d}f}{\int \! \left\lVert S(f) \right\rVert_{F}^{2} \, \mathrm{d}f}, \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/diagnostics/_utils.py\#L56}
 	\end{equation}
 	where $\lVert \cdot \rVert_{F}$ denotes the Frobenius norm and the
@@ -808,7 +803,7 @@
 		H(f) &= \left(I-\sum_{\ell=1}^{2}A_{\ell}\, e^{-i2\pi f\ell/f_{s}}\right)^{-1}.
 	\end{align}
 
-	We generate $\sim 500$ independent realisations of length $n=16{,}384$
+	We generate $500$ independent realisations of length $n=16{,}384$
 	(with a 512-point burn-in) at sampling frequency $f_{s}=1$. Each
 	realisation is fit with $K=10$ basis functions for each Cholesky
 	component, while sweeping
@@ -824,7 +819,7 @@
 	the NUTS and SVI posteriors overlaid. Both samplers recover the
 	diagonal PSDs and off-diagonal cross-spectra with substantially
 	smoother posterior medians than the raw periodogram, and the two
-	posterior medians track each other closely ($\mathrm{RMSE}=0.114$
+	posterior medians track each other closely ($\mathrm{RISE}=0.114$
 	for NUTS versus $0.102$ for SVI). The SVI credible bands, however,
 	are narrower than those of NUTS: for this realisation the
 	empirical 90\% coverage drops from $88\%$ under NUTS to $83\%$ under
@@ -838,7 +833,7 @@
 
 	Table~\ref{tab:3d_var2_results} reports a representative slice of the
 	$(N_{b},N_{h})$ grid. Coverage is near-nominal (89.8--90.8\%) across
-	every configuration, and the mean RMSE varies by less than 3\% across
+	every configuration, and the mean RISE varies by less than 3\% across
 	the grid. The number of retained frequency bins $N_{c}$ falls by a
 	factor of up to 32 between the finest ($N_{b}=1$, no coarse-graining) and
 	coarsest ($N_{b}=16$, $N_{h}=2$) configurations, with no measurable
@@ -862,10 +857,10 @@
 	\begin{table*}[!htbp]
 		\centering
 		\caption{3D VAR(2) simulation results at $n=16{,}384$, $K=10$,
-		degree-2 splines (mean $\pm$ std over ${\sim}500$ realisations),
+		degree-2 splines (mean $\pm$ std over $500$ realisations),
 		all runs at $\eta=1$. Coverage is the fraction of (frequency,
 		matrix-element) pairs inside the pointwise 90\% credible interval.
-		RMSE is the relative mean squared (Frobenius) error. ESS
+		RISE is the relative mean squared (Frobenius) error. ESS
 		is the median effective sample size across parameters. $N_{h}=$off
 		denotes no coarse-graining ($N_{h}=1$).}
 		\label{tab:3d_var2_results}
@@ -877,7 +872,7 @@
         \rowcolor{gray!10}{13-16}
         \rowcolor{gray!10}{20-21}
     \Body
-        $N_{b}$ & $N_{h}$ & $N_{c}$ & Coverage & RMSE & ESS & Runtime (s) \\
+        $N_{b}$ & $N_{h}$ & $N_{c}$ & Coverage & RISE & ESS & Runtime (s) \\
 		\midrule
 		1 & off & 8192 & $0.900 \pm 0.031$ & $0.111 \pm 0.004$ & $21,019 \pm 2726$ & $9.61 \pm 1.76$ \\
 		1 & 2 & 4096 & $0.898 \pm 0.031$ & $0.112 \pm 0.005$ & $24,057 \pm 2807$ & $9.21 \pm 1.69$ \\
@@ -907,10 +902,10 @@
 		\includegraphics[width=1\linewidth]{vi_vs_nuts_var3.pdf}
 		\caption{Representative $3\times3$ spectral density matrix estimate for a
 			single $n=16{,}384$ VAR(2) realisation, fit with $K=10$, $N_{b}=4$,
-			$N_{h}=4$ and $\eta=1$ (NUTS: $\mathrm{RMSE}=0.114$, 90\% CI
-			coverage $88\%$; SVI: $\mathrm{RMSE}=0.102$, 90\% CI coverage $83\%$).
+			$N_{h}=4$ and $\eta=1$ (NUTS: $\mathrm{RISE}=0.114$, 90\% CI
+			coverage $88\%$; SVI: $\mathrm{RISE}=0.102$, 90\% CI coverage $83\%$).
 			Each panel shows the coarse-grained periodogram statistic
-			$\Y_{h}^{*}/(T_{b}N_{b}N_{h})$ (grey), the theoretical spectrum
+			$\Y_{h}^{\mathrm{cg}}/(T_{b}N_{b}N_{h})$ (grey), the theoretical spectrum
 			(dotted black), and posterior medians with 90\% credible bands for
 			NUTS (blue) and SVI (orange). Diagonal panels ($S_{11}$, $S_{22}$,
 			$S_{33}$) show the power spectral densities, while the off-diagonal
@@ -945,7 +940,7 @@
 	\begin{equation}
 		\label{eq:M_AET}
 		M_{\AET} = \begin{pmatrix}
-			1/\sqrt{2} & 0 & -1/\sqrt{2} \\
+			-1/\sqrt{2} & 0 & 1/\sqrt{2} \\
 			1/\sqrt{6} & -2/\sqrt{6} & 1/\sqrt{6} \\
 			1/\sqrt{3} & 1/\sqrt{3} & 1/\sqrt{3}
 		\end{pmatrix},
@@ -1009,14 +1004,14 @@
 		and each of the three \AET channels is then fit independently
 		with a univariate ($p=1$) log-P-spline model on the diagonals
 		$\log\delta_{j}^{2}$ ($j=1,2,3$, corresponding to
-		$\log S_{AA}, \log S_{EE}, \log S_{TT}$) with $K=100$ knots
-		each. Only the log-diagonal expansion
+		$\log S_{AA}, \log S_{EE}, \log S_{TT}$) with $K=100$ basis
+		functions each. Only the log-diagonal expansion
 		Eq.~\eqref{eq:delta_spline} is used. The off-diagonal
 		expansions Eqs.~\eqref{eq:theta_re_spline}
 		and~\eqref{eq:theta_im_spline} are not invoked.
 		The data for this model are the three \emph{univariate}
 		averaged periodograms --- the diagonal entries
-		$S_{AA}, S_{EE}, S_{TT}$ of $\Y_{h}^{*}$ --- so the
+		$S_{AA}, S_{EE}, S_{TT}$ of $\Y_{h}^{\mathrm{cg}}$ --- so the
 		likelihood is a product of three independent Gamma
 		(univariate Whittle) likelihoods, one per \AET channel; the
 		off-diagonal periodogram entries never enter the fit. This is
@@ -1039,9 +1034,9 @@
 		off-diagonal \emph{model}, not the data. The full
 		multivariate Cholesky model
 		(Eqs.~\ref{eq:delta_spline}--\ref{eq:theta_im_spline})
-		is fit to the \AET-rotated time series with $K=100$ knots
-		on the diagonals $\log\delta_{j}^{2}$ but only $K_{\theta}=2$
-		knots on each off-diagonal component $\theta_{jl}$, forcing
+		is fit to the \AET-rotated time series with $K=100$ basis
+		functions on the diagonals $\log\delta_{j}^{2}$ but only $K_{\theta}=2$
+		basis functions on each off-diagonal component $\theta_{jl}$, forcing
 		any fitted cross-power to be smooth and small.
 		$\mathcal{H}_{1}$ thus occupies the natural middle ground
 		between the strictly diagonal $\mathcal{H}_{0}$ (off-diagonal
@@ -1055,8 +1050,8 @@
 		The cross-spectral matrix has fully populated off-diagonals.
 		The multivariate Cholesky model
 		(Eqs.~\ref{eq:delta_spline}--\ref{eq:theta_im_spline})
-		is fit directly to the \XYZ time series with $K=100$ knots
-		for \emph{every} Cholesky component, both diagonal and
+		is fit directly to the \XYZ time series with $K=100$ basis
+		functions for \emph{every} Cholesky component, both diagonal and
 		off-diagonal. No rotation is
 		needed since the fit is already in the \XYZ basis. This is
 		the unrestricted reference model.
@@ -1065,17 +1060,17 @@
 	exactly, so the strong diagonal restriction imposed by
 	$\mathcal{H}_{0}$ (and the milder one of $\mathcal{H}_{1}$)
 	are both expected to be valid descriptions, and all three
-	models should agree to within statistical resolution. For
+	models should agree within statistical resolution. For
 	\texttt{noise5a} the per-MOSA asymmetry introduces genuine
 	off-diagonal power in the \AET basis: $\mathcal{H}_{0}$ is
 	then mis-specified by construction (no off-diagonal flexibility
 	at all), $\mathcal{H}_{1}$ can absorb only the small-bandwidth
 	component of the off-diagonals through its $K_{\theta}=2$
-	knots, and $\mathcal{H}_{2}$ remains unrestricted. The expected
+	basis functions, and $\mathcal{H}_{2}$ remains unrestricted. The expected
 	fit-quality ordering is therefore
-	$\mathrm{RMSE}(\mathcal{H}_{0})\!>\!\mathrm{RMSE}(\mathcal{H}_{1})\!>\!\mathrm{RMSE}(\mathcal{H}_{2})$
+	$\mathrm{RISE}(\mathcal{H}_{0})\!>\!\mathrm{RISE}(\mathcal{H}_{1})\!>\!\mathrm{RISE}(\mathcal{H}_{2})$
 	for \texttt{noise5a} and
-	$\mathrm{RMSE}(\mathcal{H}_{0})\!\approx\!\mathrm{RMSE}(\mathcal{H}_{1})\!\approx\!\mathrm{RMSE}(\mathcal{H}_{2})$
+	$\mathrm{RISE}(\mathcal{H}_{0})\!\approx\!\mathrm{RISE}(\mathcal{H}_{1})\!\approx\!\mathrm{RISE}(\mathcal{H}_{2})$
 	for \texttt{noise4a}.
 
 	For all three models, knots are placed by the adaptive quantile rule
@@ -1084,13 +1079,13 @@
 	order one week in length, and a fixed safe-Bayes tempering
 	$\eta=0.5$ (justified by the sensitivity sweep in
 	Appendix~\ref{app:eta_sweep}). Each block is tapered with a Tukey window
-	(shape parameter $\alpha=0.1$, $\mathrm{ENBW}\approx1.04$) before
+	(taper fraction $0.1$, $\mathrm{ENBW}\approx1.04$) before
 	computing the DFT to suppress spectral leakage. The three TDI
 	transfer-function nulls at $0.030$, $0.060$, and $0.090$\,Hz are
 	excised with half-width $1$\,mHz prior to fitting. All other settings
 	follow Section~\ref{sec:bayesian-inference}.
 
-	In addition to the RMSE introduced in Section~\ref{subsec:sim_3d_var2},
+	In addition to the RISE introduced in Section~\ref{subsec:sim_3d_var2},
 	we report the median relative width of the 90\% credible band on the
 	diagonal PSDs,
 	\begin{equation}
@@ -1098,20 +1093,20 @@
 		\Delta_{\mathrm{PSD}} = \operatorname{median}_{f}
 		\frac{\hat{S}^{95\%}(f)-\hat{S}^{5\%}(f)}{\hat{S}^{50\%}(f)},
 	\end{equation}
-	computed in the \XYZ basis for all three models. This complements the RMSE
+	computed in the \XYZ basis for all three models. This complements the RISE
 	(a bias metric) with a summary of posterior precision.
-	Table~\ref{tab:lisa_results} reports RMSE, $\Delta_{\mathrm{PSD}}$, and
+	Table~\ref{tab:lisa_results} reports RISE, $\Delta_{\mathrm{PSD}}$, and
 	wall-clock duration for the three models, two datasets, and three
 	observation durations. All eighteen LISA runs satisfy the convergence
 	diagnostics of
 	Section~\ref{sec:bayesian-inference}: $\hat R<1.01$ for all parameters,
-	bulk and tail ESS exceeding $400$, E-BFMI~$>0.3$, and no problematic
-	divergent transitions or tree-depth saturation. The results split sharply
+	bulk and tail ESS exceeding $400$, E-BFMI~$>0.3$, and negligible
+	divergent transitions with no tree-depth saturation. The results split sharply
 	along the \AET-diagonalisation hypothesis.
 
 	\emph{Symmetric noise (\texttt{noise4a}).} All three models recover
 	the analytic spectral matrix at the half-percent level
-	($\mathrm{RMSE}\approx 4.4\!-\!5.3\times10^{-3}$) across all
+	($\mathrm{RISE}\approx 4.4\!-\!5.3\times10^{-3}$) across all
 	durations and are statistically indistinguishable from one another.
 	This is the expected behaviour when the \AET basis truly diagonalises
 	the noise: $\mathcal{H}_{0}$ already captures the cross-spectral
@@ -1130,16 +1125,16 @@
 	\emph{Asymmetric noise (\texttt{noise5a}).} The three models
 	separate by orders of magnitude in the order predicted by their
 	off-diagonal flexibility,
-	$\mathrm{RMSE}(\mathcal{H}_{0})\!>\!\mathrm{RMSE}(\mathcal{H}_{1})\!>\!\mathrm{RMSE}(\mathcal{H}_{2})$.
+	$\mathrm{RISE}(\mathcal{H}_{0})\!>\!\mathrm{RISE}(\mathcal{H}_{1})\!>\!\mathrm{RISE}(\mathcal{H}_{2})$.
 	$\mathcal{H}_{0}$ stalls at
-	$\mathrm{RMSE}\approx 3.3\!\times\!10^{-2}$ at all durations ---
+	$\mathrm{RISE}\approx 3.3\!\times\!10^{-2}$ at all durations ---
 	a floor set by the \AET off-diagonal power it is structurally
 	unable to represent. $\mathcal{H}_{1}$ improves on this by
 	roughly $50\%$
-	($\mathrm{RMSE}\approx 1.8\!-\!2.2\!\times\!10^{-2}$) by
-	allowing two off-diagonal knots, but is still limited
+	($\mathrm{RISE}\approx 1.8\!-\!2.2\!\times\!10^{-2}$) by
+	allowing two off-diagonal basis functions, but is still limited
 	by its narrow $\theta_{jk}$ basis. $\mathcal{H}_{2}$ reaches
-	$\mathrm{RMSE}\approx 9\!-\!11\!\times\!10^{-4}$, about
+	$\mathrm{RISE}\approx 9\!-\!11\!\times\!10^{-4}$, about
 	$20\times$ smaller than $\mathcal{H}_{1}$ and $30\!-\!40\times$
 	smaller than $\mathcal{H}_{0}$, and continues to improve with
 	duration. This monotone nested ordering is the central diagnostic
@@ -1165,7 +1160,7 @@
 	\texttt{noise5a} this tighter $\mathcal{H}_{0}$ posterior is a
 	misleading indicator of fit quality --- the bands do not include
 	the truth because the model is structurally unable to represent
-	the \AET off-diagonals, as the order-of-magnitude RMSE gap to
+	the \AET off-diagonals, as the order-of-magnitude RISE gap to
 	$\mathcal{H}_{1}$ and $\mathcal{H}_{2}$ makes clear.
 
 	\begin{table*}[!htbp]
@@ -1181,7 +1176,7 @@
 			durations. $N_{b}$ is the number of Wishart
 			time blocks (chosen to give blocks of approximately
 			seven days in length) and $N_{c}$ is set to
-			$1024$. RMSE is the relative mean squared (Frobenius)
+			$1024$. RISE is the relative mean squared (Frobenius)
 			error of the posterior-median spectral matrix
 			against the analytic reference (closed-form equal-link
 			LDC for \texttt{noise4a}, SEGWO with measured per-MOSA
@@ -1204,7 +1199,7 @@
 		\Body
 			& & & \multicolumn{3}{c}{$\mathcal{H}_{0}$} & \multicolumn{3}{c}{$\mathcal{H}_{1}$} & \multicolumn{3}{c}{$\mathcal{H}_{2}$} \\
 			\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
-			Noise & Duration & $N_{b}$ & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) & RMSE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
+			Noise & Duration & $N_{b}$ & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) & RISE & $\Delta_{\rm PSD}$ & $t$\,(s) \\
 			\midrule
 			\multirow{3}{*}{\texttt{4a}}
 				& $1$\,mo & $4$  & $4.3\!\times\!10^{-3}$ & $3.4\%$ & $16$  & $4.5\!\times\!10^{-3}$ & $4.8\%$ & $117$ & $4.7\!\times\!10^{-3}$ & $4.6\%$ & $119$ \\
@@ -1269,12 +1264,12 @@
 	independent per-channel regressions that can be sampled in parallel.
 	A blocked, coarse-grained Whittle likelihood combined with safe-Bayes
 	$\eta$-tempering yields near-nominal 90\% credible-interval coverage
-	($\approx 0.91$) across a wide $(N_{b},N_{h})$ grid on the 3D VAR(2)
+	($\approx 0.90$) across a wide $(N_{b},N_{h})$ grid on the 3D VAR(2)
 	benchmark, while reducing the number of inference-time frequency bins by
 	up to a factor of $32$.
 
 	On the synthetic 3D VAR(2) benchmark the un-tempered estimator
-	($\eta=1$) achieves coverage $\approx\!0.91$ at every $(N_{b},N_{h})$
+	($\eta=1$) achieves coverage $\approx\!0.90$ at every $(N_{b},N_{h})$
 	configuration tested. On the LISA TDI data the same un-tempered
 	estimator over-concentrates. A fixed safe-Bayes tempering $\eta=0.5$
 	recovers credible bands that contract with $\sqrt{T}$ and remain
@@ -1282,8 +1277,8 @@
 	(Appendix~\ref{app:eta_sweep}).
 
 	\paragraph{$\eta$-tempering and debiased Whittle.}
-	The $\eta$-sweep of Appendix~\ref{app:eta_sweep} shows that coverage
-	is a strong, monotone function of $\eta$ at fixed
+	The $\eta$-sweep of Appendix~\ref{app:eta_sweep} shows that
+	credible-band width is a strong, monotone function of $\eta$ at fixed
 	$(N_{b},N_{h},K)$, but does not yet identify a principled rule for
 	choosing $\eta$ across regimes. Mapping the optimal $\eta$ as a
 	function of $N_{b}N_{h}$, $K$, and the underlying spectral curvature
@@ -1356,14 +1351,14 @@
 
 
 	\subsection*{Data and Software Availability}
-	The software developed for this project is open-source and publicly available from the GitHub repository 
-	\url{https://github.com/nz-gravity/LogPsplinePSD.git}, which contains all source code, example scripts, 
-	and configuration files needed to reproduce the results. 
-	Installation instructions and dependency information (tested on Python~$\geq 3.10$) are provided in the repository \texttt{README}. 
-	The software is released under the MIT License, permitting free use, modification, and distribution. 
-	LISA time series data is available at~\citep{lisa_noise4a, lisa_noise5a}. 
-    Scripts for the LISA analysis are provided from the GitHub repository
-	\url{http://github.com/nz-gravity/lisa_multivar_logpsplines_study.git}
+	The software developed for this project is open-source and publicly available from the GitHub repository
+	\url{https://github.com/nz-gravity/LogPSplinePSD.git}, which contains all source code, example scripts,
+	and configuration files needed to reproduce the results.
+	Installation instructions and dependency information (tested on Python~$\geq 3.10$) are provided in the repository \texttt{README}.
+	The software is released under the MIT License, permitting free use, modification, and distribution.
+	The LISA time series data are available at~\citep{lisa_noise4a, lisa_noise5a}.
+    Scripts for the LISA analysis are available from the GitHub repository
+	\url{https://github.com/nz-gravity/lisa_multivar_logpsplines_study.git}.
 
 
 	\begin{acknowledgments}
@@ -1397,22 +1392,19 @@
 
 	\input{definitions_table}
 
-	\section{Additional bivariate VAR(2) sensitivity analyses}
+	\section{Bivariate VAR(2) benchmark}
 	\label{app:var2_appendix}
 
 	This appendix benchmarks the proposed estimator against the bivariate
 	Bayesian baselines available in the literature on a controlled VAR(2)
 	problem with closed-form ground truth.
 	Following~\citet{yixuan_vnpc}, we simulate 500 independent realisations of a bivariate
-	time series from a vector autoregressive model of order 2, VAR(2), using three different
-	sample sizes $n=256,512,1024$ (refer to~\citet[Section~4.2,][]{yixuan_vnpc} for the
-	definitions of the VAR(2) models). The spectral densities are estimated using
-	the multivariate P-spline method with $K=16$ basis functions and cubic splines
-	($d=3$) for each spectral component. We validate the multivariate P-spline method
-	using synthetic data from Vector Autoregressive (VAR) processes with known theoretical
-	spectral properties. The theoretical spectral density matrix provides exact
-	ground truth for comparison. To benchmark against existing Bayesian multivariate
-	spectral estimators, we compare to the variational Bayes (VB) and variational
+	VAR(2) time series at three sample sizes $n=256,512,1024$
+	(refer to~\citet[Section~4.2,][]{yixuan_vnpc} for the
+	definitions of the VAR(2) models), and the theoretical spectral
+	density matrix provides exact ground truth. The spectral densities are estimated using
+	the multivariate P-spline method with $K=16$ basis functions and degree-2 splines
+	($d=2$) for each spectral component. We compare to the variational Bayes (VB) and variational
 	nonparametric correction (VNPC) methods of~\citet{yixuan_vnpc} using the same
 	$L_{2}$ error criterion. The $L_{2}$ error is the un-normalised
 	integrated Frobenius error of the posterior-median spectral matrix,
@@ -1426,7 +1418,7 @@
 	all three settings. The mean $L_{2}$ error decreases from $0.095$ at $n=256$ to
 	$0.072$ at $n=512$ and $0.055$ at $n=1024$, compared with $0.121$, $0.091$, and
 	$0.066$ for VB and $0.129$, $0.103$, and $0.082$ for VNPC. This is the main
-	message we want from the bivariate benchmark: the proposed Log-P-spline method
+	message we want from the bivariate benchmark: the proposed multivariate P-spline method
 	achieves accuracy of the same order as established alternatives, while in these
 	simulations being modestly more accurate on average.
 
@@ -1468,7 +1460,7 @@
 			(1\,month, 6\,months, 1\,year).
 			Top: median pointwise relative width of the 90\% credible
 			band on the diagonal PSDs.
-			Bottom: matrix RMSE (narrow $y$-range---RMSE varies by
+			Bottom: matrix RISE (narrow $y$-range---RISE varies by
 			${\lesssim}5\%$ across the full sweep).
 			The vertical dotted line marks $\eta=0.5$, the value used in
 			Section~\ref{subsec:lisa}.}
@@ -1477,7 +1469,7 @@
 	\end{figure}
 
 	Two features emerge from Figure~\ref{fig:lisa_eta_sweep}.
-	First, the matrix RMSE is essentially flat across the entire sweep:
+	First, the matrix RISE is essentially flat across the entire sweep:
 	it varies by less than $\pm5\%$ about its mean at every duration,
 	confirming that the posterior-median point estimate is nearly
 	insensitive to $\eta$.
