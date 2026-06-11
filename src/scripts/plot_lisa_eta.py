@@ -55,7 +55,7 @@ fig, axes = plt.subplots(
 
 panels = [
     ("ci_width_rel_psd_diag_median", r"$\Delta_{\mathrm{PSD}}$"),
-    ("riae", "RMSE"),
+    ("riae", "RISE"),
 ]
 
 for ax, (col, ylabel) in zip(axes, panels):
