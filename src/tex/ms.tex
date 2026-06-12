@@ -44,9 +44,9 @@
 \usepackage{siunitx}
 \usepackage{float}             % provides [H] strict placement specifier
 
-\newcommand{\codelink}[1]{%
-	\quad\text{\href{#1}{\scalebox{0.65}{\GitHubIcon}}}%
-}
+\usepackage{fontawesome5}
+
+\DeclareRobustCommand{\codelink}[1]{\,\href{#1}{\mbox{\scalebox{0.65}{\faGithub}}}}
 
 
 \newcommand{\vect}[1]{\boldsymbol{#1}}
@@ -265,7 +265,7 @@
 	Table~\ref{tab:definitions} (Appendix~\ref{app:notation}). Readers
 	may find it useful to keep this table open while reading the rest of
 	this section. Let
-	$\Z=(\Z_{1},\ldots,\Z_{n})^{\intercal}\in \mathbb{R}^{n\times p}$ be a
+	$\Z=(\Z_{1},\ldots,\Z_{n})^{\top}\in \mathbb{R}^{n\times p}$ be a
 	$p$-dimensional stationary, mean-zero time series sampled at intervals
 	$\Delta_{t}=1/(2f_{Ny})$, so that $\Z_{t}=\Z(t\Delta_{t})$ for
 	$t=1,\ldots,n$, where $f_{Ny}$ is the Nyquist frequency. The total
@@ -288,7 +288,7 @@
 		\left(-2\pi i f \tau\Delta_{t} \right)
 	\]
 	is the two-sided spectral density matrix --- the Fourier transform of the
-	autocovariance $\Gamma(\tau)=\mathbb{E}(\Z_{t}\Z_{t+\tau}^{\intercal})$ at
+	autocovariance $\Gamma(\tau)=\mathbb{E}(\Z_{t}\Z_{t+\tau}^{\top})$ at
 	integer lag $\tau$. While the likelihood below is expressed in terms of
 	the two-sided density, all spectra reported in this paper (estimates,
 	analytic references, and figures) follow the one-sided convention,
@@ -300,9 +300,13 @@
 		\mathcal{L}(\d|\S) & \propto \prod_{k=1}^{N}\left|\S(f_{k})\right|^{-1}\times \nonumber         \\
 		                                                & \exp\left(-\frac{1}{T}\d(f_{k})^{*} \S(f_{k})^{-1}\d(f_{k})\right),
 	\end{align}
-	where $\d(f_{k})^{*}$ denotes the conjugate transpose of $\d(f_{k})$,
-	$\left|\cdot\right|$ denotes the matrix determinant, and
-	$\S(f_{k})$ is a Hermitian positive definite matrix.
+	where $\d(f_{k})^{*}$ denotes the conjugate transpose of $\d(f_{k})$
+	and $\left|\cdot\right|$ denotes the matrix determinant. In general a
+	spectral density matrix is only guaranteed to be Hermitian positive
+	semidefinite. The Whittle likelihood, however, requires
+	$\S(f_{k})^{-1}$ to exist, so we assume strict positive definiteness
+	throughout (a property the Cholesky parametrisation of
+	Section~\ref{subsec:cholesky} enforces by construction).
 
 	The diagonal entries $S_{ii}(f)$ are the power spectral densities (PSDs) of channel $i$,
 	while the off-diagonals $S_{ij}(f)$ for $i\neq j$ are the (complex)
@@ -312,6 +316,7 @@
 		\label{eq:coherence}
 		C_{ij}(f) \;=\; \frac{S_{ij}(f)}{\sqrt{S_{ii}(f)\,S_{jj}(f)}},
 		\qquad |C_{ij}(f)|\in[0,1],
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/datatypes/multivar_utils.py\#L213}
 	\end{align}
 	whose magnitude is zero when channels $i$ and $j$ are uncorrelated at
 	frequency $f$ and unity when they are perfectly linearly related.
@@ -333,7 +338,7 @@
 		\;=\;
 		n_{b}\frac{\sum_{t=1}^{n_b}w_{t}^{2}}
 		{\left(\sum_{t=1}^{n_b}w_{t}\right)^{2}}\, .
-		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/datatypes/multivar.py\#L237}
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/datatypes/multivar.py\#L248}
 	\end{equation}
 	We rescale each block periodogram by
 	$1/\mathrm{ENBW}$, so that the complex-Wishart mean of $\Y(f_{k})$
@@ -421,7 +426,7 @@
 	complex Wishart under a common scale matrix,
 	\begin{equation}
 		\Y_{h}^{\mathrm{cg}}\;\dot\sim\;\mathcal{CW}_{p}\!\left(T_b\,\S(\bar{f}_{h}),\, N_{b}N_{h}\right).
-		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/preprocessing/coarse_grain.py\#L177}
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/preprocessing/coarse_grain.py\#L177}
 	\end{equation}
 	The approximation is only as good as the constant-$\S$ assumption, so bin
 	edges must avoid sharp spectral features (peaks, lines, transfer-function
@@ -456,7 +461,7 @@
 		\mathcal{L}_{b,c}(\d|\S) & \propto \prod_{h=1}^{N_{c}}
 		\left|\S(\bar{f}_{h})\right|^{-N_{b}N_{h}}\times \nonumber \\
 		                         & \exp\!\left(-\tfrac{1}{T_{b}}\tr\!\left[\S(\bar{f}_{h})^{-1}\Y_{h}^{\mathrm{cg}}\right]\right),
-		                         \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L197}
+		                         \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/models.py\#L197}
 	\end{align}
 	with eigendecomposition
 	\begin{align}
@@ -474,13 +479,14 @@
 		\label{eq:enbw-likelihood}
 		\mathcal{L}_{b,c,w}(\d\mid\S)
 		\;\propto\; \mathcal{L}_{b,c}(\d\mid\S)^{1/\mathrm{ENBW}}\, .
-		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L241}
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/models.py\#L241}
 	\end{equation}
 	Thus a rectangular window leaves the likelihood unchanged, whereas a
 	non-rectangular taper reduces its curvature by the factor
 	$1/\mathrm{ENBW}$.
 
 	\subsection{Parametrisation using the Cholesky Decomposition}
+	\label{subsec:cholesky}
 	Following~\citet{RosenOri2007Aeom,Hu2023}, we parametrise the
 	\emph{inverse} spectral density matrix through its Cholesky decomposition.
 	Working with $\S^{-1}$ rather than $\S$ is what makes the problem
@@ -515,7 +521,7 @@
 		\mathcal{L}_{j}(\btheta_{j},\bdelta_{j}) \propto
 		\prod_{h=1}^{N_{c}} \delta_{jh}^{-2N_{b}N_{h}}
 		\exp\!\left(\frac{-\sum_{\nu=1}^{p}\left|u_{j\nu}^{(h)}-\sum_{l=1}^{j-1}\theta_{jl}^{(h)}\,u_{l\nu}^{(h)}\right|^{2}}
-		              {T_{b}\,\delta_{jh}^{2}}\right), \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L81}
+		              {T_{b}\,\delta_{jh}^{2}}\right), \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/models.py\#L81}
 	\end{equation}
 	\end{widetext}%
 	with regression coefficients $\theta_{jl}^{(h)}$ (the off-diagonal
@@ -581,7 +587,7 @@
 		\mathcal{L}_{\eta}(\d\mid\S)
 		\;\propto\; \mathcal{L}_{b,c,w}(\d\mid\S)^{\eta}
 		\;\propto\; \mathcal{L}_{b,c}(\d\mid\S)^{\eta/\mathrm{ENBW}},
-		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/pipeline/models.py\#L244}
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/models.py\#L244}
 	\end{equation}
 	which, together with the ENBW correction, gives an effective scaling
 	$N_{b}N_{h}\mapsto \eta N_{b}N_{h}/\mathrm{ENBW}$ in
@@ -625,7 +631,7 @@
 	\begin{align}
 		\log \delta_{jk}^{2}    & = \sum_{m=1}^{K_j}B_{m}(f_{k}) w_{j,m}^{(\delta)}\label{eq:delta_spline}     \\
 		\Re[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Re)}\label{eq:theta_re_spline} \\
-		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline} \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/psplines/psplines.py\#L545}
+		\Im[\theta_{jl}(f_{k})] & = \sum_{m=1}^{K_{jl}}B_{m}(f_{k}) w_{jl,m}^{(\Im)}\label{eq:theta_im_spline} \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/psplines/psplines.py\#L545}
 	\end{align}
 	where $B_{m}(f_{k})$ are B-spline basis functions evaluated at frequency
 	$f_{k}$, $K_{j}$ and $K_{jl}$ are the numbers of basis functions for the
@@ -636,14 +642,17 @@
 	centres $\bar{f}_{h}$, yielding the parameters $\delta_{jh}^{2}$ and
 	$\theta_{jl}^{(h)}$ that enter Eq.~\eqref{eq:likelihoodj}.
 
-	Knots are placed adaptively following
+	Knots are placed adaptively, in the spirit of
 	\citet{maturana-russel_bayesian_2021}: for each Cholesky component the
-	absolute-valued empirical periodogram is normalised to a probability
-	mass function over frequency, and knots are positioned at
-	equally-spaced quantiles of its cumulative distribution. For the
-	off-diagonal entries the real and imaginary parts are treated as
+	empirical periodogram is denoised, the absolute gradient of the result
+	--- plus a small uniform floor so that featureless regions still
+	receive knots --- is normalised to a probability mass function over
+	frequency, and knots are positioned at equally spaced quantiles of its
+	cumulative
+	distribution.\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/psplines/knots_locator/knot_locator.py\#L217}
+	For the off-diagonal entries the real and imaginary parts are treated as
 	separate components, with knots placed independently on
-	$|\Re[\theta_{jl}(f_{k})]|$ and $|\Im[\theta_{jl}(f_{k})]|$. Knots therefore cluster where the Cholesky component 
+	$|\Re[\theta_{jl}(f_{k})]|$ and $|\Im[\theta_{jl}(f_{k})]|$. Knots therefore cluster where the Cholesky component
 	varies rapidly and spread out in smooth regions, with no manual tuning.
 
 	Each component $j$ has its own penalty matrix $\bold{P}_{j}$ with
@@ -651,7 +660,7 @@
 	\begin{equation}
 		\label{eq:Pj}
 		[\bold{P}_{j}]_{lm}= \int_{0}^{1} B_{l}''(t)\, B_{m}''(t)\, \mathrm{d}t.
-		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/psplines/initialisation.py\#L150}
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/psplines/initialisation.py\#L150}
 	\end{equation}
 	Unlike the finite-difference approximation
 	$\bold{D}_{2}^{\top}\bold{D}_{2}$ used in the original P-spline
@@ -686,6 +695,7 @@
 		\bold{w}_{j} | \phi_{j} & \sim \mathcal{N}(\bold{0}, (\phi_{j} \widetilde{\bold{P}}_{j})^{-1})  \\
 		\phi_{j} | \nu_{j}   & \sim \text{Gamma}(\alpha_{\phi}, \nu_{j} \beta_{\phi}) \\
 		\nu_{j}              & \sim \text{Gamma}(\alpha_{\nu}, \beta_{\nu})
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/models.py\#L16}
 	\end{align}
 	where $\bold{w}_{j}$ is the vector of spline coefficients and
 	$\phi_{j}$, $\nu_{j}$ are precision hyperparameters.\footnote{In the
@@ -743,7 +753,9 @@
 	parameters we first run stochastic variational inference
 	\citep[SVI;][]{hoffman2013_SVI} with a low-rank Gaussian guide
 	(rank~16), optimised with Adam~\citep{Kingma2015} at learning rate
-	$10^{-3}$ for 2000 iterations. Four NUTS chains are then initialised
+	$10^{-3}$ for 2000
+	iterations.\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/pipeline/vi.py\#L134}
+	Four NUTS chains are then initialised
 	at independent draws from the resulting variational posterior. The
 	NUTS mass matrix is adapted during 2000 warm-up steps, followed by
 	an additional 2000 sampling steps per chain. These sampler settings
@@ -771,7 +783,7 @@
 	error (RISE),
 	\begin{equation}
 		\operatorname{RISE}= \frac{\int \! \left\lVert \widehat{S}(f) - S(f) \right\rVert_{F}^{2}
-		\, \mathrm{d}f}{\int \! \left\lVert S(f) \right\rVert_{F}^{2} \, \mathrm{d}f}, \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/ea1a0877d8af15aa70c834ce4a3d66b13b6248ff/src/log_psplines/diagnostics/_utils.py\#L56}
+		\, \mathrm{d}f}{\int \! \left\lVert S(f) \right\rVert_{F}^{2} \, \mathrm{d}f}, \codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/diagnostics/_utils.py\#L56}
 	\end{equation}
 	where $\lVert \cdot \rVert_{F}$ denotes the Frobenius norm and the
 	integrals are evaluated numerically using Simpson's rule over the
@@ -782,7 +794,8 @@
 	(frequency, matrix-element) pairs for which the true values lie inside
 	the pointwise $\alpha$ credible band, averaged over realisations. This
 	metric measures the calibration of the credible intervals. We use
-	$\alpha=0.9$ throughout.
+	$\alpha=0.9$
+	throughout.\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/diagnostics/_utils.py\#L131}
 
 	We simulate from a three-dimensional VAR(2) process,
 	\begin{align}
@@ -801,6 +814,7 @@
 	\begin{align}
 		\mathbf{S}(f) &= \frac{2}{f_{s}}\,H(f)\,\Sigma\,H(f)^{*}, \quad \text{with}\\
 		H(f) &= \left(I-\sum_{\ell=1}^{2}A_{\ell}\, e^{-i2\pi f\ell/f_{s}}\right)^{-1}.
+		\codelink{https://github.com/nz-gravity/LogPSplinePSD/blob/v0.1.0/src/log_psplines/example_datasets/varma_data.py\#L379}
 	\end{align}
 
 	We generate $500$ independent realisations of length $n=16{,}384$
@@ -1355,6 +1369,7 @@
 	\url{https://github.com/nz-gravity/LogPSplinePSD.git}, which contains all source code, example scripts,
 	and configuration files needed to reproduce the results.
 	Installation instructions and dependency information (tested on Python~$\geq 3.10$) are provided in the repository \texttt{README}.
+	The in-text code links (\scalebox{0.65}{\GitHubIcon}) are pinned to the tagged release \texttt{v0.1.0} of the package, so that the referenced line numbers remain valid as the codebase evolves.
 	The software is released under the MIT License, permitting free use, modification, and distribution.
 	The LISA time series data are available at~\citep{lisa_noise4a, lisa_noise5a}.
     Scripts for the LISA analysis are available from the GitHub repository
